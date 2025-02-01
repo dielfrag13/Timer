@@ -1,0 +1,12 @@
+{% include 'timer/header.html' %}
+
+<h2>Edit entry</h2>
+<br>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Update">
+</form>
+
+
+{% include 'timer/footer.html' %}

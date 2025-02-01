@@ -1,0 +1,16 @@
+{% load render_table from django_tables2 %}
+{% include 'timer/header.html' %}
+
+<h1>Operation types</h1>
+
+{% render_table operationEntryTable %}
+<!--
+{% for operation_entry in operation_list %}
+        <li><a href="{% url 'timer:operation_entry_detail' operation_entry.id %}">{{ operation_entry }}</a></li>
+{% endfor %}
+-->
+<br>
+<!--
+{% include 'timer/add_templates/add_new_operation.html' %}
+-->
+{% include 'timer/footer.html' %}

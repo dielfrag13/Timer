@@ -1,0 +1,17 @@
+{% load render_table from django_tables2 %}
+{% include 'timer/header.html' %}
+<h1>{{ surgeonEntry }}</h1>
+
+{% if surgeonTimerEntries %}
+
+    {% render_table timerEntryTable %}
+<br>
+<!--{% for entry in surgeonTimerEntries %}
+    <li><a href="{% url 'timer:timer_entry_detail' entry.id %}">{{ entry.title }}</a></li>
+{% endfor %}-->
+{% else %}
+<p>No timer entries saved yet.</p>
+{% endif %}
+
+
+{% include 'timer/footer.html' %}
