@@ -10,8 +10,11 @@
     <li><a href="{% url 'timer:timer_entry_detail' entry.id %}">{{ entry.title }}</a></li>
 {% endfor %}-->
 {% else %}
-<p>No timer entries saved yet.</p>
+<p>No timer entries for this surgeon have been saved yet.</p>
 {% endif %}
 
+<a href="{% url 'timer:update_surgeon_entry' surgeonEntry.id %}" class="btn btn-info">Update surgeon entry</a>
+<a href="{% url 'timer:delete_surgeon' surgeonEntry.id %}" class="btn btn-danger">Delete surgeon entry</a>
+<!--a href="{% url 'timer:update_surgeon_entry' surgeonEntry.id %}">Update surgeon entry</a-->
 
 {% include 'timer/footer.html' %}

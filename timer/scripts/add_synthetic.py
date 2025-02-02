@@ -6,7 +6,7 @@ def run():
     print("adding synthetic data!")
     s1, _ = timer.models.SurgeonEntry.objects.get_or_create(first_name="Tom", last_name="Foolery", email="tom.foolery@lol.gov")
     s2, _ = timer.models.SurgeonEntry.objects.get_or_create(first_name="Darrin", last_name="Trask", email="dirtydog69@aol.com")
-
+    s3, _ = timer.models.SurgeonEntry.objects.get_or_create(first_name="Katty", last_name="Wampus", email="inconsistent@gmail.xyz")
 
     o1, _ = timer.models.OperationEntry.objects.get_or_create(operation_type="Sixth Finger Augmentation")
     o2, _ = timer.models.OperationEntry.objects.get_or_create(operation_type="Synthetic Femur Upgrade")

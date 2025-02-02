@@ -1,7 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, Http404
 from django.template import loader
-from django.views.generic.edit import UpdateView
+from django.views.generic.edit import UpdateView, DeleteView
+from django.urls import reverse, reverse_lazy
 # Create your views here.
 from .models import TimerEntry, SurgeonEntry, OperationEntry
 from .forms import TimerEntryForm, SurgeonEntryForm, OperationEntryForm
@@ -162,7 +163,6 @@ def operation_entry_detail(request, operation_id):
         "operationTimerEntries" : TimerEntry.objects.filter(operation__id=operation_id),
         "timerEntryTable" : TimerEntryTable(qs)
     }
-
     return render(request, "timer/entry_details/operation_entry_detail.html", context)
 
 def timer_entry_detail(request, question_id):
@@ -185,11 +185,53 @@ def timer_entry_detail(request, question_id):
         }
     return render(request, "timer/entry_details/timer_entry_detail.html", context)
 
+def delete_timer(request, pk):
+    TimerEntry.objects.get(pk=pk).delete()
+    return redirect("timer:index")
+
+def delete_operation(request, pk):
+    OperationEntry.objects.get(pk=pk).delete()
+    return redirect("timer:operations")
+
+def delete_surgeon(request, pk):
+    SurgeonEntry.objects.get(pk=pk).delete()
+    return redirect("timer:surgeons")
+
+# Delete views
+class DeleteTimerView(DeleteView):
+    model = TimerEntry
+    success_url=reverse_lazy("timer:index")
+    template_name="timer/confirm_delete_timer.html"
+    
+class DeleteSurgeonView(DeleteView):
+    model = SurgeonEntry
+    success_url=reverse_lazy("timer:surgeons")
+    template_name="timer/confirm_delete.html"
+
+class DeleteOperationView(DeleteView):
+    model = OperationEntry
+    success_url=reverse_lazy("timer:operations")
+    template_name="timer/confirm_delete.html"
+
+# Update views
 class TimerUpdateView(UpdateView):
     model = TimerEntry
     fields = ['date', 'title', 'start_time', 'end_time', 'detail', 'surgeon', 'operation']
     #form_class = TimerEntryForm
-    template_name = "timer/update_templates/TimerEntry_update_form.html"
+    template_name = "timer/update_templates/update_form.html"
+
+class SurgeonUpdateView(UpdateView):
+    model = SurgeonEntry
+    fields = ['first_name', 'last_name', 'email']
+    #form_class = TimerEntryForm
+    template_name = "timer/update_templates/update_form.html"
+
+class OperationUpdateView(UpdateView):
+    model = OperationEntry
+    fields = ['operation_type', ]
+    #form_class = TimerEntryForm
+    template_name = "timer/update_templates/update_form.html"
+
 
 def redirect_to_timer(request):
     return redirect("timer:index")

@@ -17,6 +17,10 @@ class SurgeonEntry(models.Model):
     def full_name(self):
         return "{} {}".format(self.first_name, self.last_name)
 
+    # used in the update class-based view to redirect on success
+    def get_absolute_url(self):
+        return reverse('timer:surgeon_entry_detail', args=(self.pk,))
+    
     def __str__(self):
         return "{} {}".format(self.first_name, self.last_name)
 
@@ -29,6 +33,9 @@ class OperationEntry(models.Model):
         return TimerEntry.objects.filter(operation__pk=self.pk).count()
 
 
+    # used in the update class-based view to redirect on success
+    def get_absolute_url(self):
+        return reverse('timer:operation_entry_detail', args=(self.pk,))
 
     def __str__(self):
         return "{}".format(self.operation_type)
@@ -72,7 +79,7 @@ class TimerEntry(models.Model):
     def get_absolute_url(self):
         return reverse('timer:timer_entry_detail', args=(self.pk,))
 
-    #def __str__(self):
-    #    return self.title
+    def __str__(self):
+        return self.title
 
 

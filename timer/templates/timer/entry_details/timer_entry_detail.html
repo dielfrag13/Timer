@@ -15,7 +15,10 @@
     <li> Operation type: {{ TimerEntry.operation }}</li>
 </ul>
 -->
-<a href="{% url 'timer:update_timer_entry' TimerEntry.id %}">Update timer entry</a>
+<a href="{% url 'timer:update_timer_entry' TimerEntry.id %}" class="btn btn-info">Update timer entry</a>
+<a href="{% url 'timer:delete_timer' TimerEntry.id %}" class="btn btn-danger">Delete timer entry</a>
+
+<!--button class="btn btn-danger rounded-0" type="button" data-toggle="tooltip" data-placement="top" title="Delete">Delete entry</button-->
 
 <!--
 <br><br>

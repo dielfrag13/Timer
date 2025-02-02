@@ -13,6 +13,8 @@
 <p>No timer entries for this operation type have been saved yet.</p>
 {% endif %}
 
-{% include 'timer/add_templates/add_new_operation.html' %}
+
+<a href="{% url 'timer:update_operation_entry' operationEntry.id %}" class="btn btn-info">Update operation entry</a>
+<a href="{% url 'timer:delete_operation' operationEntry.id %}" class="btn btn-danger">Delete operation entry</a>
 
 {% include 'timer/footer.html' %}
