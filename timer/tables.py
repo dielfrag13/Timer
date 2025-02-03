@@ -1,30 +1,30 @@
 import django_tables2 as tables
-from .models import TimerEntry, SurgeonEntry, OperationEntry
+from .models import Surgeon, OperationType
 
-class OperationEntryTable(tables.Table):
-    operation_type = tables.LinkColumn('timer:operation_entry_detail', args=[tables.A('pk')])
+class OperationTypeTable(tables.Table):
+    operation_type = tables.LinkColumn('timer:operation_type_detail', args=[tables.A('pk')])
     class Meta:
-        model = OperationEntry
+        model = OperationType
         fields = ('operation_type', 'surgery_count')
         attrs = {'class': 'table table-striped table-hover'}
 
 
-class SurgeonEntryTableMinimal(tables.Table):
-    full_name = tables.LinkColumn('timer:surgeon_entry_detail', args=[tables.A('pk')])
+class SurgeonTableMinimal(tables.Table):
+    #full_name = tables.LinkColumn('timer:surgeon_entry_detail', args=[tables.A('pk')])
     class Meta:
-        model = SurgeonEntry
+        model = Surgeon
         fields = ('full_name', 'email')
         attrs = {'class': 'table table-striped table-hover'}
 
 
-class SurgeonEntryTable(tables.Table):
-    first_name = tables.LinkColumn('timer:surgeon_entry_detail', args=[tables.A('pk')])
+class SurgeonTable(tables.Table):
+    first_name = tables.LinkColumn('timer:surgeon_detail', args=[tables.A('pk')])
     class Meta:
-        model = SurgeonEntry
+        model = Surgeon
         fields = ('first_name', 'last_name', 'email', 'surgery_count')
         attrs = {'class': 'table table-striped table-hover'}
 
-
+"""
 class TimerEntryTable(tables.Table):
     # per the django table docs, you can do render_foo method for a 'foo' column
     # https://django-tables2.readthedocs.io/en/latest/pages/custom-data.html#table-render-foo-methods
@@ -58,3 +58,4 @@ class TimerEntryTable(tables.Table):
         fields = ('title', 'operation', 'surgeon', 'start_time', 'end_time', 'elapsed_time', 'dist_from_average')
         attrs = {'class': 'table table-striped table-hover'}
 
+"""

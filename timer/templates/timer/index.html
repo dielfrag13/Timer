@@ -5,49 +5,23 @@
     <h2 class="text-danger">Please make sure to add at least one surgeon and operation before adding time entries.</h2>
 {% endif %}
 
-{% if surgeon_list and operation_list and latest_time_list %}
-<h2>Recent timer entries</h2>
-{% render_table timerEntryTable %}
-<br><br>
-{% elif surgeon_list and operation_list %}
-    <p>No timer entries have been added.</p>
-{% endif %}
 
 <div class="row border">
     {% if surgeon_list and operation_list %}
     <div class="col border"><br>
-        {% include 'timer/add_templates/add_new_timer.html' %}
+        {% include 'timer/add_templates/begin_new_operation.html' %}
     </div>
     {% endif %}
 
     <div class="col border"><br>
-        <!--
-    {% if surgeon_list %}
-        <br>
-        <h1>Surgeons</h1>
-        {% render_table surgeonEntryTableMinimal %}
-    {% endif %}
-        -->
     {% include 'timer/add_templates/add_new_surgeon.html' %}
     </div>
 
     <div class="col border"><br>
-        {% if operation_list %}
 
-        {% endif %}
         {% include 'timer/add_templates/add_new_operation.html' %}
     </div>
 
-
-
-<!--
-    <ul>
-    {% for timer_entry in latest_time_list %}
-        <li><a href="{% url 'timer:timer_entry_detail' timer_entry.id %}">{{ timer_entry.title }}</a></li>
-
-    {% endfor %}
-    </ul>
--->
 
 </div> 
 {% include 'timer/footer.html' %}

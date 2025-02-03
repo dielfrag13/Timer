@@ -1,0 +1,9 @@
+
+<h1>Begin a new operation</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {{ operation_instance_form.as_p }}
+    <button type="submit" class="btn btn-info"> Begin new operation</button>
+</form>
+<br>

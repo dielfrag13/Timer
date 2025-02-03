@@ -4,102 +4,102 @@ from django.template import loader
 from django.views.generic.edit import UpdateView, DeleteView
 from django.urls import reverse, reverse_lazy
 # Create your views here.
-from .models import TimerEntry, SurgeonEntry, OperationEntry
-from .forms import TimerEntryForm, SurgeonEntryForm, OperationEntryForm
-from .tables import TimerEntryTable, SurgeonEntryTable, OperationEntryTable, SurgeonEntryTableMinimal
-
+from .models import Surgeon, OperationType
+from .forms import *
+from .tables import *
 
 
 def index(request):
 
-    latest_timer_list = TimerEntry.objects.all().order_by('-pk')[:5]
-    surgeon_list = SurgeonEntry.objects.all().order_by('-pk')[:5]
-    operation_list = OperationEntry.objects.all()
+    surgeon_list = Surgeon.objects.all().order_by('-pk')[:5]
+    operation_list = OperationType.objects.all().order_by('-pk')[:5]
 
     if request.method == "POST":
-        # determine which entry form was clicked
-        isBool = True 
-        for fieldName in TimerEntryForm().fields.keys():
-             if fieldName not in request.POST:
-                 isBool = False
-                 break
+        isBool = True
+        for fieldName in SurgeonForm().fields.keys():
+            if fieldName not in request.POST:
+                isBool = False
+                break
         if isBool:
-            timerEntryForm = TimerEntryForm(request.POST)
+            # then it's a SurgeonForm
+            newSurgeonForm = SurgeonForm(request.POST)
+            if newSurgeonForm.is_valid():
+                newSurgeonEntry = newSurgeonForm.save()
+                return redirect('timer:index')
         else:
-            timerEntryForm = TimerEntryForm()
-        
+            # it's an OperationForm
+            newOperationTypeForm = OperationTypeForm(request.POST)
+            if newOperationTypeForm.is_valid():
+                newOperationType = newOperationTypeForm.save()
+                return redirect('timer:index')
 
-        # do the same as above for surgeon and operation
-        surgeonEntryForm = SurgeonEntryForm(request.POST)
-        operationEntryForm = OperationEntryForm(request.POST)
-        if timerEntryForm.is_valid():
-            newTimerEntry = timerEntryForm.save()
-            return redirect('timer:timer_entry_detail', question_id=newTimerEntry.id)
-        elif surgeonEntryForm.is_valid() and operationEntryForm.is_valid():
-            newSurgeonEntry = surgeonEntryForm.save()
-            newOperationEntry = operationEntryForm.save()
-            return redirect('timer:index')
-        elif operationEntryForm.is_valid():
-            newOperationEntry = operationEntryForm.save()
-            return redirect('timer:index')
-        elif surgeonEntryForm.is_valid():
-            newSurgeonEntry = surgeonEntryForm.save()
-            return redirect('timer:index')
+
     else:
-        timerEntryForm = TimerEntryForm()
-        surgeonEntryForm = SurgeonEntryForm()
-        operationEntryForm = OperationEntryForm()
+        surgeonForm = SurgeonForm()
+        operationTypeForm = OperationTypeForm()
 
     context = {
-        "latest_time_list": latest_timer_list,
         "surgeon_list" : surgeon_list,
         "operation_list" : operation_list,
-        "timerEntryForm" : timerEntryForm,
-        "surgeonEntryForm" : surgeonEntryForm,
-        "operationEntryForm" : operationEntryForm,
-        "timerEntryTable" : TimerEntryTable(latest_timer_list),
-        "surgeonEntryTableMinimal" : SurgeonEntryTableMinimal(surgeon_list),
-    }
+        "operation_type_form" : operationTypeForm,
+        "surgeon_form" : surgeonForm,
+        "operation_instance_form" : OperationInstanceForm(),
 
+    }
     return render(request, "timer/index.html", context)
 
 
-
-
-
 def surgeons(request):
-    surgeon_list = SurgeonEntry.objects.all()
+    surgeon_list = Surgeon.objects.all()
 
     if request.method == "POST":
-        surgeonEntryForm = SurgeonEntryForm(request.POST)
-        if surgeonEntryForm.is_valid():
-            newSurgeonEntry = surgeonEntryForm.save()
-            return redirect('timer:surgeon_entry_detail', surgeon_id=newSurgeonEntry.id)
+        surgeonForm = SurgeonForm(request.POST)
+        if surgeonForm.is_valid():
+            newSurgeon = surgeonForm.save()
+            return redirect('timer:surgeon_detail', surgeon_id=newSurgeon.id)
     else:
-        surgeonEntryForm = SurgeonEntryForm()
+        surgeonForm = SurgeonForm()
 
 
     context = {
         "surgeon_list" : surgeon_list,
-        "surgeonEntryForm" : surgeonEntryForm,
-        "surgeonEntryTable" : SurgeonEntryTable(surgeon_list)
+        "surgeon_form" : surgeonForm,
+        "surgeon_table" : SurgeonTable(surgeon_list)
     }
     return render(request, "timer/surgeons.html", context)
 
 
-
-
-
-def surgeon_entry_detail(request, surgeon_id):
-    thing = get_object_or_404(SurgeonEntry, pk=surgeon_id)
+def operations(request):
+    operation_list = OperationType.objects.all()
     if request.method == "POST":
-        surgeonEntryForm = SurgeonEntryForm(request.POST)
-        if surgeonEntryForm.is_valid():
-            newSurgeonEntry = surgeonEntryForm.save()
-            return redirect('timer:surgeon_detail', surgeon_id=newSurgeonEntry.id)
+        operation_type_form = OperationTypeForm(request.POST)
+        if operation_type_form.is_valid():
+            newOperationType = operation_type_form.save()
+            return redirect('timer:operation_detail', surgeon_id=newOperationType.id)
     else:
-        surgeonEntryForm = SurgeonEntryForm()
+        operation_type_form = OperationTypeForm()
     
+    operation_type_table = OperationTypeTable(operation_list)
+    context = {
+        "operation_list" : operation_list,
+        "operation_type_form" : operation_type_form,
+        "operation_type_table" :  operation_type_table,
+        }
+    return render(request, "timer/operations.html", context)
+
+
+
+
+def surgeon_detail(request, surgeon_id):
+    thing = get_object_or_404(Surgeon, pk=surgeon_id)
+    if request.method == "POST":
+        surgeonEntryForm = SurgeonForm(request.POST)
+        if surgeonEntryForm.is_valid():
+            newSurgeon = surgeonEntryForm.save()
+            return redirect('timer:surgeon_detail', surgeon_id=newSurgeon.id)
+    else:
+        surgeonEntryForm = SurgeonForm()
+    """
     qs = TimerEntry.objects.filter(surgeon__id=surgeon_id)
     if qs:
         qs_nums = qs.values_list("elapsed_time", flat=True)
@@ -107,47 +107,27 @@ def surgeon_entry_detail(request, surgeon_id):
         for entry in qs:
             percentage_str = f"{(((entry.elapsed_time - avg) / avg)*100):.2f}%"
             entry.dist_from_average = percentage_str
-
+    """
     context = {
         "surgeonEntry" : thing, 
         "surgeonEntryForm" : surgeonEntryForm,
-        "surgeonTimerEntries" : TimerEntry.objects.filter(surgeon__id=surgeon_id),
-        "timerEntryTable" : TimerEntryTable(qs)
     }
 
     return render(request, "timer/entry_details/surgeon_entry_detail.html", context)
 
 
-
-def operations(request):
-    operation_list = OperationEntry.objects.all()
-    if request.method == "POST":
-        operationEntryForm = OperationEntryForm(request.POST)
-        if operationEntryForm.is_valid():
-            newOperationEntry = operationEntryForm.save()
-            return redirect('timer:operation_detail', surgeon_id=newOperationEntry.id)
-    else:
-        operationEntryForm = OperationEntryForm()
-    
-    operationEntryTable = OperationEntryTable(operation_list)
-    context = {
-        "operation_list" : operation_list,
-        "operationEntryForm" : operationEntryForm,
-        "operationEntryTable" :  operationEntryTable   }
-    return render(request, "timer/operations.html", context)
-
-def operation_entry_detail(request, operation_id):
-    thing = get_object_or_404(OperationEntry, pk=operation_id)
+def operation_type_detail(request, operation_id):
+    thing = get_object_or_404(OperationType, pk=operation_id)
 
     if request.method == "POST":
-        operationEntryForm = OperationEntryForm(request.POST)
-        if operationEntryForm.is_valid():
-            newOperationEntry = operationEntryForm.save()
-            return redirect('timer:operation_detail', operation_id=newOperationEntry.id)
+        operation_type_form = OperationTypeForm(request.POST)
+        if operation_type_form.is_valid():
+            newOperationType = operation_type_form.save()
+            return redirect('timer:operation_detail', operation_id=newOperationType.id)
     else:
-        operationEntryForm = OperationEntryForm()
+        operation_type_form = OperationTypeForm()
 
-
+    """
     qs = TimerEntry.objects.filter(operation__id=operation_id)
     if qs:
         qs_nums = qs.values_list("elapsed_time", flat=True)
@@ -155,16 +135,15 @@ def operation_entry_detail(request, operation_id):
         for entry in qs:
             percentage_str = f"{(((entry.elapsed_time - avg) / avg)*100):.2f}%"
             entry.dist_from_average = percentage_str
-    
+    """
 
     context = {
         "operationEntry" : thing, 
-        "operationEntryForm" : operationEntryForm,
-        "operationTimerEntries" : TimerEntry.objects.filter(operation__id=operation_id),
-        "timerEntryTable" : TimerEntryTable(qs)
+        "operation_type_form" : operation_type_form,
     }
     return render(request, "timer/entry_details/operation_entry_detail.html", context)
 
+"""
 def timer_entry_detail(request, question_id):
     # the key in the dictionary is the variable name of what's in the HTML
     # return render(request, "timer/detail.html", {"TimerEntry" : thing})
@@ -190,44 +169,47 @@ def delete_timer(request, pk):
     return redirect("timer:index")
 
 def delete_operation(request, pk):
-    OperationEntry.objects.get(pk=pk).delete()
+    OperationType.objects.get(pk=pk).delete()
     return redirect("timer:operations")
 
 def delete_surgeon(request, pk):
-    SurgeonEntry.objects.get(pk=pk).delete()
+    Surgeon.objects.get(pk=pk).delete()
     return redirect("timer:surgeons")
 
 # Delete views
+"""
+"""
 class DeleteTimerView(DeleteView):
     model = TimerEntry
     success_url=reverse_lazy("timer:index")
     template_name="timer/confirm_delete_timer.html"
-    
+""" 
 class DeleteSurgeonView(DeleteView):
-    model = SurgeonEntry
+    model = Surgeon
     success_url=reverse_lazy("timer:surgeons")
     template_name="timer/confirm_delete.html"
 
 class DeleteOperationView(DeleteView):
-    model = OperationEntry
+    model = OperationType
     success_url=reverse_lazy("timer:operations")
     template_name="timer/confirm_delete.html"
 
 # Update views
+"""
 class TimerUpdateView(UpdateView):
     model = TimerEntry
     fields = ['date', 'title', 'start_time', 'end_time', 'detail', 'surgeon', 'operation']
     #form_class = TimerEntryForm
     template_name = "timer/update_templates/update_form.html"
-
+"""
 class SurgeonUpdateView(UpdateView):
-    model = SurgeonEntry
+    model = Surgeon
     fields = ['first_name', 'last_name', 'email']
     #form_class = TimerEntryForm
     template_name = "timer/update_templates/update_form.html"
 
 class OperationUpdateView(UpdateView):
-    model = OperationEntry
+    model = OperationType
     fields = ['operation_type', ]
     #form_class = TimerEntryForm
     template_name = "timer/update_templates/update_form.html"
@@ -236,12 +218,4 @@ class OperationUpdateView(UpdateView):
 def redirect_to_timer(request):
     return redirect("timer:index")
 
-def results(request, question_id):
-    return HttpResponse("results -- you're looking at whatever %s is." % question_id)
 
-def vote(request, question_id):
-    return HttpResponse("vote -- you're looking at whatever %s is." % question_id)
-
-
-
-# helper methods

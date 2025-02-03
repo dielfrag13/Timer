@@ -1,9 +1,0 @@
-
-<h1>Add a new timer entry</h1>
-
-<form method="post">
-    {% csrf_token %}
-    {{ timerEntryForm.as_p }}
-    <button type="submit" class="btn btn-info">Add new Timer Entry</button>
-</form>
-<br>
