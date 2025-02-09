@@ -54,6 +54,8 @@ class OperationInstance(models.Model):
     # who did this
     surgeon = models.ForeignKey(Surgeon, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.operation_type.operation_type
     """
     Next up, we want to add the interfaces for adding steps. Would like a form
     where i can click "+" and get a new form field which corresponds to a new step. 
@@ -70,7 +72,8 @@ class Step(models.Model):
 
     # 50 characters to title this step
     title = models.CharField(max_length=50)
-
+    def __str__(self):
+        return self.title
     # 'instances' field comes from StepInstance 
 
 

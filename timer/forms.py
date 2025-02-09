@@ -3,7 +3,7 @@ import string
 from django import forms
 from django.utils import timezone
 
-from .models import Surgeon, OperationType, OperationInstance
+from .models import Surgeon, OperationType, OperationInstance, Step, StepInstance
 
 class TimeWidget(forms.Widget):
     def render(self, name, value, attrs=None, renderer=None):
@@ -58,6 +58,13 @@ class OperationInstanceForm(forms.ModelForm):
         widgets = {
             'date' : DateWidget()
         }
+
+class StepForm(forms.ModelForm):
+    class Meta:
+        model = Step
+        fields = ['title',]
+
+StepFormSet = forms.modelformset_factory(Step, form=StepForm, extra=1)
 
 """
 class TimerEntryForm(forms.ModelForm):

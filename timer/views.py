@@ -3,6 +3,7 @@ from django.http import HttpResponse, Http404
 from django.template import loader
 from django.views.generic.edit import UpdateView, DeleteView
 from django.urls import reverse, reverse_lazy
+from django.forms import modelformset_factory
 # Create your views here.
 from .models import Surgeon, OperationType
 from .forms import *
@@ -15,18 +16,29 @@ def index(request):
     operation_list = OperationType.objects.all().order_by('-pk')[:5]
 
     if request.method == "POST":
-        isBool = True
+        isSurgeon = False
+        isOperation = False
         for fieldName in SurgeonForm().fields.keys():
             if fieldName not in request.POST:
-                isBool = False
+                isSurgeon = False
                 break
-        if isBool:
-            # then it's a SurgeonForm
+            isSurgeon = True
             newSurgeonForm = SurgeonForm(request.POST)
             if newSurgeonForm.is_valid():
                 newSurgeonEntry = newSurgeonForm.save()
                 return redirect('timer:index')
-        else:
+        if not isSurgeon:
+            # check to see if it's an Operation
+            for fieldName in OperationInstanceForm().fields.keys():
+                if fieldName not in request.POST:
+                    isOperation = False
+                    break
+                isOperation = True
+                newOperationInstanceForm = OperationInstanceForm(request.POST)
+                if newOperationInstanceForm.is_valid():
+                    newOperationInstanceEntry = newOperationInstanceForm.save()
+                    return redirect("timer:ocs1", operation_instance_id=newOperationInstanceEntry.pk)
+        if not (isSurgeon or isOperation):
             # it's an OperationForm
             newOperationTypeForm = OperationTypeForm(request.POST)
             if newOperationTypeForm.is_valid():
@@ -37,13 +49,14 @@ def index(request):
     else:
         surgeonForm = SurgeonForm()
         operationTypeForm = OperationTypeForm()
+        operationInstanceForm = OperationInstanceForm()
 
     context = {
         "surgeon_list" : surgeon_list,
         "operation_list" : operation_list,
         "operation_type_form" : operationTypeForm,
         "surgeon_form" : surgeonForm,
-        "operation_instance_form" : OperationInstanceForm(),
+        "operation_instance_form" : operationInstanceForm,
 
     }
     return render(request, "timer/index.html", context)
@@ -142,6 +155,40 @@ def operation_type_detail(request, operation_id):
         "operation_type_form" : operation_type_form,
     }
     return render(request, "timer/entry_details/operation_entry_detail.html", context)
+
+
+def operation_creation_step_one(request, operation_instance_id):
+    op_inst = get_object_or_404(OperationInstance, pk=operation_instance_id)
+    if Step.objects.all().count() == 0:
+        StepFormSet = modelformset_factory(Step, form=StepForm, extra=1)
+    else:
+        StepFormSet = modelformset_factory(Step, form=StepForm, extra=0)
+    #StepFormSet = modelformset_factory(Step, fields=["title",], extra=0)
+
+    if request.method == "POST":
+        print("prior to formset creation")
+        import code
+        #code.interact(local=locals())
+        formset = StepFormSet(request.POST)
+        print("after formset creation")
+        #code.interact(local=locals())
+        if formset.is_valid():
+            formset.save()
+            return redirect("timer:index")
+        else:
+            print("formset is not valid!")
+            import code
+            code.interact(local=locals())
+    else:
+        formset = StepFormSet(queryset=Step.objects.all())
+        #formset = StepFormSet()
+    context = {
+        "formset" : formset,
+        "operation_instance" : op_inst,
+
+    }
+    return render(request, 'timer/add_templates/add_operation_steps.html', context)
+
 
 """
 def timer_entry_detail(request, question_id):
