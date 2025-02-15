@@ -166,14 +166,32 @@ def operation_creation_step_one(request, operation_instance_id):
     #StepFormSet = modelformset_factory(Step, fields=["title",], extra=0)
 
     if request.method == "POST":
-        print("prior to formset creation")
-        import code
-        #code.interact(local=locals())
         formset = StepFormSet(request.POST)
-        print("after formset creation")
-        #code.interact(local=locals())
         if formset.is_valid():
-            formset.save()
+            form_order = 1
+            for form in formset:
+                print("get order")
+                import code
+                code.interact(local=locals())
+                if form.has_changed():
+                    new_model = Step(title=form.cleaned_data['title'])
+                    new_model.save()
+                    step = new_model
+                # ignore empty fields
+                elif 'title' not in form.cleaned_data:
+                    continue
+                else:
+                    form.save()
+                    step = form.cleaned_data['id']
+
+                # create new StepInstances and link them to this OperationInstance                
+                print("create new StepInstance with 'step'")
+                si = StepInstance.objects.create(step=step, order=form_order, operation_instance=op_inst)
+                form_order += 1
+            import code
+            code.interact(local=locals())
+
+
             return redirect("timer:index")
         else:
             print("formset is not valid!")
@@ -188,6 +206,16 @@ def operation_creation_step_one(request, operation_instance_id):
 
     }
     return render(request, 'timer/add_templates/add_operation_steps.html', context)
+
+
+def operation_creation_step_two(request, operation_instance_id):
+
+    """continue via creating a new ModelForm form for StepInstances using existing queryset info"""
+    op_inst = get_object_or_404(OperationInstance, pk=operation_instance_id)
+
+    context = {}
+
+
 
 
 """

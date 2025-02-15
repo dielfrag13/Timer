@@ -64,7 +64,11 @@ class StepForm(forms.ModelForm):
         model = Step
         fields = ['title',]
 
-StepFormSet = forms.modelformset_factory(Step, form=StepForm, extra=1)
+class StepInstanceForm(forms.ModelForm):
+    pass
+
+
+
 
 """
 class TimerEntryForm(forms.ModelForm):

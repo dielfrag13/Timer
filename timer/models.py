@@ -54,6 +54,10 @@ class OperationInstance(models.Model):
     # who did this
     surgeon = models.ForeignKey(Surgeon, on_delete=models.CASCADE)
 
+    # step instances
+    # steps = models.ForeignKey("StepInstance", on_delete=models.CASCADE) 
+
+
     def __str__(self):
         return self.operation_type.operation_type
     """
@@ -89,8 +93,8 @@ class StepInstance(models.Model):
 
 
     # time started and ended
-    start_time = models.TimeField("time started")
-    end_time = models.TimeField("time ended")
+    start_time = models.TimeField("time started", null=True, blank=True)
+    end_time = models.TimeField("time ended", null=True, blank=True)
 
     # calculated by the view based on other relative timer entries
     #from_average = models.CharField()
@@ -98,7 +102,7 @@ class StepInstance(models.Model):
     elapsed_time = models.IntegerField(null=True, default=None)
 
     def save(self, *args, **kwargs):
-        if not self.elapsed_time:
+        if not self.elapsed_time and self.start_time and self.end_time:
             st = datetime.datetime.combine(datetime.date.today(), self.start_time)
             et = datetime.datetime.combine(datetime.date.today(), self.end_time)
             self.elapsed_time = (et - st).seconds
