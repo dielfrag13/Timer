@@ -1,0 +1,40 @@
+{% include 'timer/header.html' %}
+
+<h2>Mark times</h2>
+
+<input class="btn btn-success" id="start-button" name="start_button" value="Start Operation">
+
+<br>
+
+<form method="post">
+    {% csrf_token %}
+    {{ formset.management_form }}
+    <input type="hidden" id="start-time" name="start-time" value="">
+    <div id="formset-container">
+        {% for form in formset %}
+            <div class="form-row">
+                {{ form.title }}
+                {{ form.end_time }} 
+                {{ form.id }}
+                <button class="move-up" type="button">↑</button> 
+                <button class="move-down" type="button">↓</button>
+                <button class="remove" type="button">Remove</button>
+            </div>
+        {% endfor %}
+    </div>
+    <button type="submit">Submit</button>
+</form>
+
+
+
+<script>
+    document.getElementById('start-button').onclick = function() {
+        if (document.getElementById('start-button').value == "Start Operation") {
+            document.getElementById('start-button').value = "Operation started!";
+            document.getElementById('start-time').value = new Date().toTimeString().split(' ')[0];
+        }
+    }
+</script>
+
+
+{% include 'timer/footer.html' %}

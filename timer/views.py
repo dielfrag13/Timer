@@ -9,6 +9,7 @@ from .models import Surgeon, OperationType
 from .forms import *
 from .tables import *
 
+from datetime import datetime
 
 def index(request):
 
@@ -170,9 +171,6 @@ def operation_creation_step_one(request, operation_instance_id):
         if formset.is_valid():
             form_order = 1
             for form in formset:
-                print("get order")
-                import code
-                code.interact(local=locals())
                 if form.has_changed():
                     new_model = Step(title=form.cleaned_data['title'])
                     new_model.save()
@@ -185,14 +183,10 @@ def operation_creation_step_one(request, operation_instance_id):
                     step = form.cleaned_data['id']
 
                 # create new StepInstances and link them to this OperationInstance                
-                print("create new StepInstance with 'step'")
                 si = StepInstance.objects.create(step=step, order=form_order, operation_instance=op_inst)
                 form_order += 1
-            import code
-            code.interact(local=locals())
 
-
-            return redirect("timer:index")
+            return redirect("timer:ocs2", operation_instance_id=operation_instance_id)
         else:
             print("formset is not valid!")
             import code
@@ -213,8 +207,33 @@ def operation_creation_step_two(request, operation_instance_id):
     """continue via creating a new ModelForm form for StepInstances using existing queryset info"""
     op_inst = get_object_or_404(OperationInstance, pk=operation_instance_id)
 
-    context = {}
+    StepInstanceFormSet = modelformset_factory(StepInstance, form=StepInstanceForm, extra=0)
+    steps = op_inst.steps.all()
 
+    if request.method == "POST":
+        formset = StepInstanceFormSet(request.POST)
+        if formset.is_valid():
+
+            start_time = datetime.strptime(request.POST['start-time'], "%H:%M:%S").time()
+            current_start_time = start_time
+            for form in formset:
+                form.instance.start_time = current_start_time
+                form.save()
+                # set current_start_time for next iteration of this formset
+                current_start_time = form.instance.end_time
+
+            pass
+            
+    else:
+        formset = StepInstanceFormSet(queryset=steps)
+
+    context = {
+        "formset" : formset,
+    }
+
+    # figure out how to print a part of the formset queryset data in HTML
+
+    return render(request, 'timer/add_templates/time_steps.html', context)
 
 
 

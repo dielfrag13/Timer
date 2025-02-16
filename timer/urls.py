@@ -14,8 +14,9 @@ urlpatterns = [
     
     path("operations/<int:operation_id>/", views.operation_type_detail, name="operation_type_detail"),
 
+    # ocs1: operation creation step 1
     path("op/<int:operation_instance_id>/new_s1/", views.operation_creation_step_one, name="ocs1"),
-
+    path("op/<int:operation_instance_id>/new_s2/", views.operation_creation_step_two, name="ocs2"),
     #path("updateTimer/<int:pk>/", views.TimerUpdateView.as_view(), name="update_timer_entry"),
     path("updateSurgeon/<int:pk>/", views.SurgeonUpdateView.as_view(), name="update_surgeon_entry"),
     path("updateOperation/<int:pk>/", views.OperationUpdateView.as_view(), name="update_operation_entry"),

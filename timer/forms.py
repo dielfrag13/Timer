@@ -13,6 +13,9 @@ class TimeWidget(forms.Widget):
         return f'<input type="time" step="1" name="{name}" id="{randId}-field" required=""> <a href="#" onclick="{js2}">Now</a>'
 
 
+
+
+
 class DateWidget(forms.Widget):
     def render(self, name, value, attrs=None, renderer=None):
         cs = string.ascii_letters + string.digits
@@ -64,8 +67,30 @@ class StepForm(forms.ModelForm):
         model = Step
         fields = ['title',]
 
+
+# self.attrs is set within the form widget init
+# the variable 'step_name' is hardcoded in there
+class TimeWidgetWithStepName(forms.Widget):
+    def render(self, name, value, attrs=None, renderer=None):
+        cs = string.ascii_letters + string.digits
+        randId = ''.join(random.choice(cs) for _ in range(10))
+        js2 = f"""document.getElementById('{randId}-field').value=new Date().toTimeString().split(' ')[0]"""        
+        return f'<label>{self.attrs["step_name"]}:</label><input type="time" step="1" name="{name}" id="{randId}-field" required=""> <a href="#" onclick="{js2}">Now</a>'
+
+# we're only filling out one additional field with the form
 class StepInstanceForm(forms.ModelForm):
-    pass
+    class Meta:
+        model = StepInstance
+        fields = ['end_time',]
+        widgets = {
+            'end_time' : TimeWidgetWithStepName(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # self.instance refers to this model instance
+        if self.instance:
+            self.fields['end_time'].widget.attrs['step_name'] = self.instance.step.title
 
 
 
