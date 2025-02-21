@@ -9,7 +9,7 @@ from .models import Surgeon, OperationType
 from .forms import *
 from .tables import *
 
-from datetime import datetime
+from datetime import datetime, date
 
 def index(request):
 
@@ -89,7 +89,7 @@ def operations(request):
         operation_type_form = OperationTypeForm(request.POST)
         if operation_type_form.is_valid():
             newOperationType = operation_type_form.save()
-            return redirect('timer:operation_detail', surgeon_id=newOperationType.id)
+            return redirect('timer:operation_type_detail', surgeon_id=newOperationType.id)
     else:
         operation_type_form = OperationTypeForm()
     
@@ -113,8 +113,8 @@ def surgeon_detail(request, surgeon_id):
             return redirect('timer:surgeon_detail', surgeon_id=newSurgeon.id)
     else:
         surgeonEntryForm = SurgeonForm()
+    qs = OperationInstance.objects.filter(surgeon__id=surgeon_id, complete=True)
     """
-    qs = TimerEntry.objects.filter(surgeon__id=surgeon_id)
     if qs:
         qs_nums = qs.values_list("elapsed_time", flat=True)
         avg = sum(qs_nums) / len(qs_nums)
@@ -125,6 +125,7 @@ def surgeon_detail(request, surgeon_id):
     context = {
         "surgeonEntry" : thing, 
         "surgeonEntryForm" : surgeonEntryForm,
+        "surgeon_operation_entries" : OperationInstanceTable(qs)
     }
 
     return render(request, "timer/entry_details/surgeon_entry_detail.html", context)
@@ -137,7 +138,7 @@ def operation_type_detail(request, operation_id):
         operation_type_form = OperationTypeForm(request.POST)
         if operation_type_form.is_valid():
             newOperationType = operation_type_form.save()
-            return redirect('timer:operation_detail', operation_id=newOperationType.id)
+            return redirect('timer:operation_type_detail', operation_id=newOperationType.id)
     else:
         operation_type_form = OperationTypeForm()
 
@@ -158,12 +159,25 @@ def operation_type_detail(request, operation_id):
     return render(request, "timer/entry_details/operation_entry_detail.html", context)
 
 
+def operation_instance_detail(request, operation_instance_id):
+    op_inst = get_object_or_404(OperationInstance, pk=operation_instance_id)
+
+    context = {
+        "operation_instance" : op_inst,
+        "operation_instance_table" : OperationInstanceTable(OperationInstance.objects.filter(pk=op_inst.pk)),
+        "step_instance_table" : StepInstanceTable(op_inst.steps.all()),
+    }
+    return render(request, "timer/entry_details/operation_instance_detail.html", context)
+
 def operation_creation_step_one(request, operation_instance_id):
     op_inst = get_object_or_404(OperationInstance, pk=operation_instance_id)
-    if Step.objects.all().count() == 0:
-        StepFormSet = modelformset_factory(Step, form=StepForm, extra=1)
-    else:
+    # if there are steps associated with this operation instance type, we want no extra elements.
+    if StepInstance.objects.filter(operation_instance__operation_type=op_inst.operation_type).count() > 0:
         StepFormSet = modelformset_factory(Step, form=StepForm, extra=0)
+        print("extra is 0")
+    else:
+        StepFormSet = modelformset_factory(Step, form=StepForm, extra=1)
+        print("extra is 1")
     #StepFormSet = modelformset_factory(Step, fields=["title",], extra=0)
 
     if request.method == "POST":
@@ -192,8 +206,11 @@ def operation_creation_step_one(request, operation_instance_id):
             import code
             code.interact(local=locals())
     else:
-        formset = StepFormSet(queryset=Step.objects.all())
-        #formset = StepFormSet()
+        most_recent_op = OperationInstance.objects.filter(surgeon=op_inst.surgeon, operation_type=op_inst.operation_type, complete=True).exclude(id=op_inst.id).last()
+        if most_recent_op:
+            formset = StepFormSet(queryset=Step.objects.filter(instances__in=most_recent_op.steps.all()))
+        else:
+            formset=StepFormSet(queryset=Step.objects.none())
     context = {
         "formset" : formset,
         "operation_instance" : op_inst,
@@ -221,14 +238,20 @@ def operation_creation_step_two(request, operation_instance_id):
                 form.save()
                 # set current_start_time for next iteration of this formset
                 current_start_time = form.instance.end_time
-
-            pass
+            
+            st = datetime.combine(date.today(), op_inst.steps.first().start_time)
+            et = datetime.combine(date.today(), op_inst.steps.last().end_time)
+            op_inst.elapsed_time = (et - st).seconds
+            op_inst.complete = True
+            op_inst.save()
+            return redirect('timer:operation_instance_detail', operation_instance_id=operation_instance_id)
             
     else:
         formset = StepInstanceFormSet(queryset=steps)
 
     context = {
         "formset" : formset,
+        "operation_instance" : op_inst,
     }
 
     # figure out how to print a part of the formset queryset data in HTML
@@ -285,7 +308,7 @@ class DeleteSurgeonView(DeleteView):
 
 class DeleteOperationView(DeleteView):
     model = OperationType
-    success_url=reverse_lazy("timer:operations")
+    success_url=reverse_lazy("timer:operation_types")
     template_name="timer/confirm_delete.html"
 
 # Update views

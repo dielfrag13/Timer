@@ -1,8 +1,11 @@
 import django_tables2 as tables
-from .models import Surgeon, OperationType
+from .models import Surgeon, OperationType, OperationInstance, StepInstance, Step
+
+
 
 class OperationTypeTable(tables.Table):
     operation_type = tables.LinkColumn('timer:operation_type_detail', args=[tables.A('pk')])
+    
     class Meta:
         model = OperationType
         fields = ('operation_type', 'surgery_count')
@@ -22,6 +25,44 @@ class SurgeonTable(tables.Table):
     class Meta:
         model = Surgeon
         fields = ('first_name', 'last_name', 'email', 'surgery_count')
+        attrs = {'class': 'table table-striped table-hover'}
+
+class OperationInstanceTable(tables.Table):
+
+    def render_elapsed_time(self, value):
+        return f"{value//3600:02}:{(value%3600)//3600:02}:{value%60:02}"
+
+    operation_type = tables.LinkColumn('timer:operation_type_detail', args=[tables.A('operation_type__pk')])
+    surgeon = tables.LinkColumn('timer:surgeon_detail', args=[tables.A('surgeon__pk')])
+
+    class Meta:
+        model = OperationInstance
+        fields = ('operation_type', 'date', 'surgeon', 'elapsed_time',)
+        attrs = {'class': 'table table-striped table-hover'}
+
+class StepInstanceTable(tables.Table):
+
+    def render_start_time(self, value):
+        return value.strftime("%I:%M %p")
+
+    def render_end_time(self, value):
+        return value.strftime("%I:%M %p")
+
+    def render_elapsed_time(self, value):
+        return f"{value//3600:02}:{(value%3600)//3600:02}:{value%60:02}"
+
+    def render_dist_from_average(self, value, column):
+        if value[0] == "-":
+            # green
+            column.attrs = {'td' : {'class' : 'text-success'}}
+            return value[1:] + " lower than average"
+        else:
+            column.attrs = {'td' : {'class' : 'text-danger'}}
+            return value + " higher than average"
+
+    class Meta:
+        model = StepInstance
+        fields = ('step', 'start_time', 'end_time', 'elapsed_time', 'dist_from_average')
         attrs = {'class': 'table table-striped table-hover'}
 
 """

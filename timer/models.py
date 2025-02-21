@@ -25,10 +25,26 @@ class Surgeon(models.Model):
         return "{} {}".format(self.first_name, self.last_name)
 
 
+"""
+
+Yo! uhhh i think we're at a good place
+
+
+"""
+
+
+
+
+
+
 
 class OperationType(models.Model):
     """Represents a type of operation (e.g. Sixth finger augmentation, SmartFemur replacement)"""
     operation_type = models.CharField(max_length=100)
+
+    @property
+    def operation_count(self):
+        return OperationInstance.objects.filter(type=self, complete=True).count()
 
     # used in the update class-based view to redirect on success
     def get_absolute_url(self):
@@ -54,18 +70,20 @@ class OperationInstance(models.Model):
     # who did this
     surgeon = models.ForeignKey(Surgeon, on_delete=models.CASCADE)
 
-    # step instances
-    # steps = models.ForeignKey("StepInstance", on_delete=models.CASCADE) 
+    elapsed_time = models.IntegerField(null=True, default=None)
 
+    complete = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if not self.elapsed_time and self.steps.all() and self.steps.first().start_time and self.steps.last().end_time:
+            st = datetime.datetime.combine(datetime.date.today(), self.steps.first().start_time)
+            et = datetime.datetime.combine(datetime.date.today(), self.steps.last().end_time)
+            self.elapsed_time = (et - st).seconds
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.operation_type.operation_type
-    """
-    Next up, we want to add the interfaces for adding steps. Would like a form
-    where i can click "+" and get a new form field which corresponds to a new step. 
-    May need custom forms soon.
-    
-    """
 
 class Step(models.Model):
     """

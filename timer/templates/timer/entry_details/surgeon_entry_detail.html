@@ -2,15 +2,15 @@
 {% include 'timer/header.html' %}
 <h1>{{ surgeonEntry }}</h1>
 
-{% if surgeonTimerEntries %}
+{% if surgeon_operation_entries %}
 
-    {% render_table timerEntryTable %}
+    {% render_table surgeon_operation_entries %}
 <br>
 <!--{% for entry in surgeonTimerEntries %}
     <li><a href="{% url 'timer:timer_entry_detail' entry.id %}">{{ entry.title }}</a></li>
 {% endfor %}-->
 {% else %}
-<p>No timer entries for this surgeon have been saved yet.</p>
+<p>No operation entries for this surgeon have been saved yet.</p>
 {% endif %}
 
 <a href="{% url 'timer:update_surgeon_entry' surgeonEntry.id %}" class="btn btn-info">Update surgeon entry</a>

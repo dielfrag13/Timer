@@ -1,0 +1,10 @@
+{% load render_table from django_tables2 %}
+{% include 'timer/header.html' %}
+
+<h2>Operation Instance {{ operation_instance.operation_type.operation_type }}</h2>
+
+    {% render_table operation_instance_table %}
+    <br>
+    {% render_table step_instance_table %}
+
+{% include 'timer/footer.html' %}
