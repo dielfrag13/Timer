@@ -2,14 +2,23 @@
 {% include 'timer/header.html' %}
 <h1>{{ surgeonEntry }}</h1>
 
-{% if surgeon_operation_entries %}
+{% if complete_surgeon_operation_entries %}
 
-    {% render_table surgeon_operation_entries %}
+    <h2>Complete entries</h2>
+    {% render_table complete_surgeon_operation_entries %}
 <br>
+{% endif %}
+
+
+{% if incomplete_surgeon_operation_entries %}
+    <h2>Incomplete entries</h2>
+    {% render_table incomplete_surgeon_operation_entries %}
+<br>
+{% endif %}
 <!--{% for entry in surgeonTimerEntries %}
     <li><a href="{% url 'timer:timer_entry_detail' entry.id %}">{{ entry.title }}</a></li>
 {% endfor %}-->
-{% else %}
+{% if not complete_surgeon_operation_entries and not incomplete_surgeon_operation_entries %}
 <p>No operation entries for this surgeon have been saved yet.</p>
 {% endif %}
 

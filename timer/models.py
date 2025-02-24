@@ -70,10 +70,12 @@ class OperationInstance(models.Model):
     # who did this
     surgeon = models.ForeignKey(Surgeon, on_delete=models.CASCADE)
 
-    elapsed_time = models.IntegerField(null=True, default=None)
 
+    # status flags - to be true when mentioned
+    ocs1 = models.BooleanField(default=False)
     complete = models.BooleanField(default=False)
 
+    elapsed_time = models.IntegerField(null=True, default=None)
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         if not self.elapsed_time and self.steps.all() and self.steps.first().start_time and self.steps.last().end_time:

@@ -32,7 +32,7 @@ class OperationInstanceTable(tables.Table):
     def render_elapsed_time(self, value):
         return f"{value//3600:02}:{(value%3600)//3600:02}:{value%60:02}"
 
-    operation_type = tables.LinkColumn('timer:operation_type_detail', args=[tables.A('operation_type__pk')])
+    operation_type = tables.LinkColumn('timer:operation_instance_detail', args=[tables.A('pk')])
     surgeon = tables.LinkColumn('timer:surgeon_detail', args=[tables.A('surgeon__pk')])
 
     class Meta:

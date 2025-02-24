@@ -106,6 +106,7 @@ def operations(request):
 
 def surgeon_detail(request, surgeon_id):
     thing = get_object_or_404(Surgeon, pk=surgeon_id)
+    context = {'surgeonEntry' : thing}
     if request.method == "POST":
         surgeonEntryForm = SurgeonForm(request.POST)
         if surgeonEntryForm.is_valid():
@@ -113,7 +114,17 @@ def surgeon_detail(request, surgeon_id):
             return redirect('timer:surgeon_detail', surgeon_id=newSurgeon.id)
     else:
         surgeonEntryForm = SurgeonForm()
-    qs = OperationInstance.objects.filter(surgeon__id=surgeon_id, complete=True)
+    context['surgeonEntryForm'] = surgeonEntryForm
+
+    complete_surgeries = OperationInstance.objects.filter(surgeon__id=surgeon_id, complete=True)
+    if complete_surgeries:
+        context["complete_surgeon_operation_entries"] = OperationInstanceTable(complete_surgeries)
+
+    incomplete_surgeries = OperationInstance.objects.filter(surgeon__id=surgeon_id, complete=False)
+    if incomplete_surgeries:
+        context["incomplete_surgeon_operation_entries"] = OperationInstanceTable(incomplete_surgeries)
+    
+
     """
     if qs:
         qs_nums = qs.values_list("elapsed_time", flat=True)
@@ -122,11 +133,6 @@ def surgeon_detail(request, surgeon_id):
             percentage_str = f"{(((entry.elapsed_time - avg) / avg)*100):.2f}%"
             entry.dist_from_average = percentage_str
     """
-    context = {
-        "surgeonEntry" : thing, 
-        "surgeonEntryForm" : surgeonEntryForm,
-        "surgeon_operation_entries" : OperationInstanceTable(qs)
-    }
 
     return render(request, "timer/entry_details/surgeon_entry_detail.html", context)
 
@@ -162,6 +168,13 @@ def operation_type_detail(request, operation_id):
 def operation_instance_detail(request, operation_instance_id):
     op_inst = get_object_or_404(OperationInstance, pk=operation_instance_id)
 
+    # redirect to a creation step if this op_inst isn't coplete
+    if op_inst.complete == False:
+        if op_inst.ocs1 == True:
+            return redirect('timer:ocs2', operation_instance_id=operation_instance_id)
+        else:
+            return redirect('timer:ocs1', operation_instance_id=operation_instance_id)
+
     context = {
         "operation_instance" : op_inst,
         "operation_instance_table" : OperationInstanceTable(OperationInstance.objects.filter(pk=op_inst.pk)),
@@ -171,6 +184,13 @@ def operation_instance_detail(request, operation_instance_id):
 
 def operation_creation_step_one(request, operation_instance_id):
     op_inst = get_object_or_404(OperationInstance, pk=operation_instance_id)
+
+    # ensure we're on the right page and aren't repeating a step
+    if op_inst.complete == True:
+        return redirect('timer:operation_instance_detail', operation_instance_id=operation_instance_id)
+    elif op_inst.ocs1 == True:
+        return redirect('timer:ocs2', operation_instance_id=operation_instance_id)
+
     # if there are steps associated with this operation instance type, we want no extra elements.
     if StepInstance.objects.filter(operation_instance__operation_type=op_inst.operation_type).count() > 0:
         StepFormSet = modelformset_factory(Step, form=StepForm, extra=0)
@@ -199,7 +219,8 @@ def operation_creation_step_one(request, operation_instance_id):
                 # create new StepInstances and link them to this OperationInstance                
                 si = StepInstance.objects.create(step=step, order=form_order, operation_instance=op_inst)
                 form_order += 1
-
+            op_inst.ocs1 = True
+            op_inst.save()
             return redirect("timer:ocs2", operation_instance_id=operation_instance_id)
         else:
             print("formset is not valid!")
@@ -223,6 +244,13 @@ def operation_creation_step_two(request, operation_instance_id):
 
     """continue via creating a new ModelForm form for StepInstances using existing queryset info"""
     op_inst = get_object_or_404(OperationInstance, pk=operation_instance_id)
+
+    # if this is not the right page, redirect accordingly
+    if op_inst.ocs1 == False:
+        return redirect("timer:ocs1", operation_instance_id=operation_instance_id)
+    elif op_inst.complete == True:
+        return redirect('timer:operation_instance_detail', operation_instance_id=operation_instance_id)
+
 
     StepInstanceFormSet = modelformset_factory(StepInstance, form=StepInstanceForm, extra=0)
     steps = op_inst.steps.all()
