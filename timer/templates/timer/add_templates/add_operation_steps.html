@@ -31,10 +31,27 @@
             input.name = input.name.replace(/\d+/, container.children.length); // Update index
             input.id = input.id.replace(/\d+/, container.children.length);
         });
+        newForm.querySelector('.remove').onclick = function() {
+            if ((document.getElementById('id_form-TOTAL_FORMS').value) > 1) {
+                const formRow = this.parentNode;
+                formRow.parentNode.removeChild(formRow);
+                document.getElementById('id_form-TOTAL_FORMS').value = document.getElementById('formset-container').querySelectorAll('div').length;
+            }
+        };
         container.appendChild(newForm);
         document.getElementById('id_form-TOTAL_FORMS').value = document.getElementById('formset-container').querySelectorAll('div').length;
-        // need to do a replace on the value of document.getElementById('id_form-TOTAL_FORMS') to be the new form count length!!!!!!!!!!
+        // need to do a replace on the value of document.getElementById('id_form-TOTAL_FORMS') to be the new form count length
     };
+    // add functionality to remove button
+    document.querySelectorAll('.remove').forEach(button => {
+        button.onclick = function() {
+            if ((document.getElementById('id_form-TOTAL_FORMS').value) > 1) {
+                const formRow = this.parentNode;
+                formRow.parentNode.removeChild(formRow);
+                document.getElementById('id_form-TOTAL_FORMS').value = document.getElementById('formset-container').querySelectorAll('div').length;
+            }
+        };
+    });
 
     // Add event listeners for move buttons and remove buttons
     // Additional JavaScript logic needed for moving and removing forms.
