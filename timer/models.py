@@ -10,7 +10,7 @@ class Surgeon(models.Model):
 
     @property
     def operation_count(self):
-        return OperationInstance.objects.filter(surgeon__pk=self.pk).count()
+        return OperationInstance.objects.filter(surgeon=self, complete=True).count()
 
     # for minimal table
     @property

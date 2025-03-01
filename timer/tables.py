@@ -24,7 +24,7 @@ class SurgeonTable(tables.Table):
     first_name = tables.LinkColumn('timer:surgeon_detail', args=[tables.A('pk')])
     class Meta:
         model = Surgeon
-        fields = ('first_name', 'last_name', 'email', 'surgery_count')
+        fields = ('first_name', 'last_name', 'email', 'operation_count')
         attrs = {'class': 'table table-striped table-hover'}
 
 class OperationInstanceTable(tables.Table):
