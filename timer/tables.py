@@ -8,7 +8,7 @@ class OperationTypeTable(tables.Table):
     
     class Meta:
         model = OperationType
-        fields = ('operation_type', 'surgery_count')
+        fields = ('operation_type', 'operation_count')
         attrs = {'class': 'table table-striped table-hover'}
 
 

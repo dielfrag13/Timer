@@ -25,18 +25,6 @@ class Surgeon(models.Model):
         return "{} {}".format(self.first_name, self.last_name)
 
 
-"""
-
-Yo! uhhh i think we're at a good place
-
-
-"""
-
-
-
-
-
-
 
 class OperationType(models.Model):
     """Represents a type of operation (e.g. Sixth finger augmentation, SmartFemur replacement)"""
@@ -44,7 +32,10 @@ class OperationType(models.Model):
 
     @property
     def operation_count(self):
-        return OperationInstance.objects.filter(type=self, complete=True).count()
+        print("models.py operation count")
+        import code
+        code.interact(local=locals())
+        return OperationInstance.objects.filter(operation_type=self, complete=True).count()
 
     # used in the update class-based view to redirect on success
     def get_absolute_url(self):
