@@ -24,7 +24,7 @@ urlpatterns = [
     path("delete_operation/<int:pk>/", views.DeleteOperationView.as_view(), name="delete_operation"),
     #path("deleteSuccess", views.Delete.as_view(), name="delete_timer"),
     #path("deleteSuccess", views.DeleteTimerView.as_view(), name="delete_timer"),
-
+    path("testpage/", views.TestView, name="test"),
     # ex: /polls/5/
     #path("timer_entry_detail/<int:question_id>/", views.timer_entry_detail, name="timer_entry_detail"),
     # ex: /polls/5/results/

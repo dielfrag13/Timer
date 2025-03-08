@@ -4,7 +4,10 @@ from django.template import loader
 from django.views.generic.edit import UpdateView, DeleteView
 from django.urls import reverse, reverse_lazy
 from django.forms import modelformset_factory
-# Create your views here.
+
+# Create your views here.    
+from django.core.exceptions import ValidationError
+
 from .models import Surgeon, OperationType
 from .forms import *
 from .tables import *
@@ -193,10 +196,10 @@ def operation_creation_step_one(request, operation_instance_id):
 
     # if there are steps associated with this operation instance type, we want no extra elements.
     if StepInstance.objects.filter(operation_instance__operation_type=op_inst.operation_type).count() > 0:
-        StepFormSet = modelformset_factory(Step, form=StepForm, extra=0)
+        StepFormSet = modelformset_factory(Step, form=StepForm, formset=CustomStepFormSet, extra=0)
         print("extra is 0")
     else:
-        StepFormSet = modelformset_factory(Step, form=StepForm, extra=1)
+        StepFormSet = modelformset_factory(Step, form=StepForm, formset=CustomStepFormSet, extra=1)
         print("extra is 1")
     #StepFormSet = modelformset_factory(Step, fields=["title",], extra=0)
 
@@ -209,11 +212,14 @@ def operation_creation_step_one(request, operation_instance_id):
                     new_model = Step(title=form.cleaned_data['title'])
                     new_model.save()
                     step = new_model
-                # ignore empty fields
-                elif 'title' not in form.cleaned_data:
-                    continue
+                # this just errors out the server itself
+                #elif 'title' not in form.cleaned_data:
+                #    raise forms.ValidationError("Field cannot be blank")
+                #    print("this shouldn't happen")
                 else:
-                    form.save()
+                    if form.is_valid():
+                        form.save()
+                    
                     step = form.cleaned_data['id']
 
                 # create new StepInstances and link them to this OperationInstance                
@@ -224,8 +230,8 @@ def operation_creation_step_one(request, operation_instance_id):
             return redirect("timer:ocs2", operation_instance_id=operation_instance_id)
         else:
             print("formset is not valid!")
-            import code
-            code.interact(local=locals())
+            #import code
+            #code.interact(local=locals())
     else:
         most_recent_op = OperationInstance.objects.filter(surgeon=op_inst.surgeon, operation_type=op_inst.operation_type, complete=True).exclude(id=op_inst.id).last()
         if most_recent_op:
@@ -286,49 +292,37 @@ def operation_creation_step_two(request, operation_instance_id):
 
     return render(request, 'timer/add_templates/time_steps.html', context)
 
+def TestView(request):
 
+    context = {}
+    single_form = StepForm()
+    context['single_form'] = single_form
+    StepFormSet = modelformset_factory(Step, form=StepForm, formset=CustomStepFormSet, extra=1)
 
-"""
-def timer_entry_detail(request, question_id):
-    # the key in the dictionary is the variable name of what's in the HTML
-    # return render(request, "timer/detail.html", {"TimerEntry" : thing})
-
-    thing = get_object_or_404(TimerEntry, pk=question_id)
 
     if request.method == "POST":
-        timerEntryForm = TimerEntryForm(request.POST)
-        if timerEntryForm.is_valid():
-            newTimerEntry = timerEntryForm.save()
-            return redirect('timer:timer_entry_detail', question_id=newTimerEntry.id)
+        step_formset = StepFormSet(request.POST)
+
+        if step_formset.is_valid():
+            print("step formset is valid")
+            step_formset = StepFormSet(queryset=Step.objects.none())
+        else:
+            print("step formset is not valid")
+        #code.interact(local=locals())
+        # reset step formset
+    
     else:
-        timerEntryForm = TimerEntryForm()
-    context = {
-        "TimerEntry": thing, 
-        "timerEntryForm" : timerEntryForm,
-        "timerEntryTable" : TimerEntryTable(TimerEntry.objects.filter(pk=thing.pk))
-        }
-    return render(request, "timer/entry_details/timer_entry_detail.html", context)
+        step_formset = StepFormSet(queryset=Step.objects.none())
 
-def delete_timer(request, pk):
-    TimerEntry.objects.get(pk=pk).delete()
-    return redirect("timer:index")
+    context['step_formset'] = step_formset 
+    return render(request, 'timer/test.html', context)
 
-def delete_operation(request, pk):
-    OperationType.objects.get(pk=pk).delete()
-    return redirect("timer:operations")
 
-def delete_surgeon(request, pk):
-    Surgeon.objects.get(pk=pk).delete()
-    return redirect("timer:surgeons")
 
-# Delete views
-"""
-"""
-class DeleteTimerView(DeleteView):
-    model = TimerEntry
-    success_url=reverse_lazy("timer:index")
-    template_name="timer/confirm_delete_timer.html"
-""" 
+
+#####################
+# class based views #
+#####################
 class DeleteSurgeonView(DeleteView):
     model = Surgeon
     success_url=reverse_lazy("timer:surgeons")

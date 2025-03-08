@@ -2,6 +2,7 @@ import random
 import string
 from django import forms
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 from .models import Surgeon, OperationType, OperationInstance, Step, StepInstance
 
@@ -11,9 +12,6 @@ class TimeWidget(forms.Widget):
         randId = ''.join(random.choice(cs) for _ in range(10))
         js2 = f"""document.getElementById('{randId}-field').value=new Date().toTimeString().split(' ')[0]"""        
         return f'<input type="time" step="1" name="{name}" id="{randId}-field" required=""> <a href="#" onclick="{js2}">Now</a>'
-
-
-
 
 
 class DateWidget(forms.Widget):
@@ -62,10 +60,46 @@ class OperationInstanceForm(forms.ModelForm):
             'date' : DateWidget()
         }
 
+# TODO: make this thing error in a way that the formset does, when required=False.
+# basically, server side validation instead of client side. 
 class StepForm(forms.ModelForm):
+
+    title = forms.CharField(required=True)
+
     class Meta:
         model = Step
         fields = ['title',]
+    """
+    def clean_title(self):
+        print("StepForm clean title method")
+        value = self.cleaned_data.get('title', '').strip()
+        if not value:
+            raise forms.ValidationError("This field must not be empty.")
+        return value
+
+    def clean(self):
+        print("clean method in stepfrm")
+        self.clean_title()
+        return super().clean()
+    """
+
+class CustomStepFormSet(forms.BaseModelFormSet):
+    def clean(self):
+        has_error = False
+        print("custom step formset clean")
+        #import code
+        #code.interact(local=locals())
+        #if any(self.errors):
+        #    return
+        for form in self.forms:
+            if not form.cleaned_data.get('title'):
+                if len(form.errors) == 0:
+                    # something else might have added an error to this already... kinda weird
+                    form.add_error('title', "this field cannot be empty")
+                has_error = True
+                print("raising validation error in customstepformset")
+        if has_error:
+            raise forms.ValidationError("all forms must be filled out.")
 
 
 # self.attrs is set within the form widget init

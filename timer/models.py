@@ -87,6 +87,7 @@ class Step(models.Model):
 
     # 50 characters to title this step
     title = models.CharField(max_length=50)
+
     def __str__(self):
         return self.title
     # 'instances' field comes from StepInstance 

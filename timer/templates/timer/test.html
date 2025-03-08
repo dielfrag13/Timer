@@ -1,17 +1,24 @@
 {% include 'timer/header.html' %}
 
-<h2>Edit steps for new operation {{ operation_instance }}</h2>
+
 <form method="post">
     {% csrf_token %}
-    {{ formset.management_form }}
+    {{ single_form.as_p }}
+    <button type="submit" class="btn btn-info"> Begin new operation</button>
+</form>
+<br><br>
+<form method="post">
+    {% csrf_token %}
+    {{ step_formset.management_form }}
     <div id="formset-container">
-        {% for form in formset %}
-            <div class="form-row">
+        {% for form in step_formset %}
+            <div class="form-row"> 
                 {{ form.title }} 
                 {{ form.id }}
                 <!--button class="move-up" type="button">↑</button--> 
                 <!--button class="move-down" type="button">↓</button-->
                 <button class="remove" type="button">Remove</button>
+            </div>
             {% for field in form %}
                 {% if field.errors %}
                     {% for error in field.errors %}
@@ -19,7 +26,6 @@
                     {% endfor %}
                 {% endif %}
             {% endfor %}
-            </div>
         {% endfor %}
     </div>
     <button type="button" id="add-form">Add Another Step</button>
@@ -60,39 +66,6 @@
             }
         };
     });
-
-    // Add event listeners for move buttons and remove buttons
-    // Additional JavaScript logic needed for moving and removing forms.
-    // what it looks like on initial after adding a couple entries, when it works properly:
-    /*
-<div id="formset-container">
-        
-            <div class="form-row">
-                <input type="text" name="form-0-title" maxlength="50" id="id_form-0-title"> 
-                <input type="hidden" name="form-0-id" id="id_form-0-id">
-                <button class="move-up" type="button">↑</button> 
-                <button class="move-down" type="button">↓</button>
-                <button class="remove" type="button">Remove</button>
-            </div>
-        
-            <div class="form-row">
-                <input type="text" name="form-1-title" maxlength="50" id="id_form-1-title"> 
-                <input type="hidden" name="form-1-id" id="id_form-1-id" value="">
-                <button class="move-up" type="button">↑</button> 
-                <button class="move-down" type="button">↓</button>
-                <button class="remove" type="button">Remove</button>
-            </div>
-            <div class="form-row">
-                <input type="text" name="form-2-title" maxlength="50" id="id_form-2-title"> 
-                <input type="hidden" name="form-2-id" id="id_form-2-id" value="">
-                <button class="move-up" type="button">↑</button> 
-                <button class="move-down" type="button">↓</button>
-                <button class="remove" type="button">Remove</button>
-            </div></div>
-    */
 </script>
-
-
-
 
 {% include 'timer/footer.html' %}
