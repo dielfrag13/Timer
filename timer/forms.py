@@ -83,6 +83,18 @@ class StepForm(forms.ModelForm):
         return super().clean()
     """
 
+# TODO bug:
+# have like 7 steps generated, delete a step and then it'll still say you need it
+# need to fix that -- i think we just need to clear errors somehow befor each validation call?
+"""
+    def clean(self):
+        #Checks that no form in the formset is empty and marks them invalid individually.
+        if any(self.errors):  # Skip validation if there are already errors
+            return
+        ...
+        ...
+"""
+# TODO BUG
 class CustomStepFormSet(forms.BaseModelFormSet):
     def clean(self):
         has_error = False
