@@ -98,18 +98,26 @@ class StepForm(forms.ModelForm):
 class CustomStepFormSet(forms.BaseModelFormSet):
     def clean(self):
         has_error = False
-        #print("custom step formset clean")
-        #import code
-        #code.interact(local=locals())
+        step_values = []
         for form in self.forms:
-            if not form.cleaned_data.get('title'):
+
+            # check for duplicate step names
+            if form.cleaned_data.get('title') in step_values:
+                form.add_error('title', f"field {form.cleaned_data.get('title')} already in step list")
+                has_error = True
+            
+            # now check to see if there are empty fields
+            elif not form.cleaned_data.get('title'):
                 if len(form.errors) == 0:
                     # something else might have added an error to this already... kinda weird
                     form.add_error('title', "this field cannot be empty")
                 has_error = True
-                print("raising validation error in customstepformset")
+            else:
+                step_values.append(form.cleaned_data.get('title'))
+            
         if has_error:
-            raise forms.ValidationError("all forms must be filled out.")
+            print("raising validation error in customstepformset")
+            raise forms.ValidationError("Validation errors found in step list.")
 
 
 # self.attrs is set within the form widget init
