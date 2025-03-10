@@ -186,6 +186,8 @@ def operation_instance_detail(request, operation_instance_id):
     return render(request, "timer/entry_details/operation_instance_detail.html", context)
 
 def operation_creation_step_one(request, operation_instance_id):
+
+
     op_inst = get_object_or_404(OperationInstance, pk=operation_instance_id)
 
     # ensure we're on the right page and aren't repeating a step
@@ -203,8 +205,16 @@ def operation_creation_step_one(request, operation_instance_id):
         print("extra is 1")
     #StepFormSet = modelformset_factory(Step, fields=["title",], extra=0)
 
+    # TODO bug: if you delete one step and then add a new step, double bug. 
     if request.method == "POST":
         formset = StepFormSet(request.POST)
+        # clear out prior errors or errors set not as part of custom formset field validation
+        for form in formset:
+            if 'title' in form.errors:
+                del form.errors['title']
+            if 'id' in form.errors:
+                del form.errors['id']
+        
         if formset.is_valid():
             form_order = 1
             for form in formset:

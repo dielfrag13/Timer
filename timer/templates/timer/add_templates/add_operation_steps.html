@@ -44,8 +44,20 @@
                 const formRow = this.parentNode;
                 formRow.parentNode.removeChild(formRow);
                 document.getElementById('id_form-TOTAL_FORMS').value = document.getElementById('formset-container').querySelectorAll('div').length;
-            }
+                // reset all the IDs of the formset
+                var id = 0
+                document.getElementById('formset-container').querySelectorAll('.form-row').forEach(formrow => {
+                    formrow.querySelector('input').id = `id_form-${id}-title`;
+                    formrow.querySelector('input').name = `form-${id}-title`;
+                    id += 1;
+                })
+            };
         };
+        /*
+        document.getElementById('formset-container').querySelectorAll('.form-row').forEach(formrow => {
+  console.log(formrow.querySelector('input'));
+})
+  */
         container.appendChild(newForm);
         document.getElementById('id_form-TOTAL_FORMS').value = document.getElementById('formset-container').querySelectorAll('div').length;
         // need to do a replace on the value of document.getElementById('id_form-TOTAL_FORMS') to be the new form count length
@@ -57,7 +69,14 @@
                 const formRow = this.parentNode;
                 formRow.parentNode.removeChild(formRow);
                 document.getElementById('id_form-TOTAL_FORMS').value = document.getElementById('formset-container').querySelectorAll('div').length;
-            }
+                // reset all the IDs of the formset
+                var id = 0
+                document.getElementById('formset-container').querySelectorAll('.form-row').forEach(formrow => {
+                    formrow.querySelector('input').id = `id_form-${id}-title`;
+                    formrow.querySelector('input').name = `form-${id}-title`;
+                    id += 1;
+                })
+            };
         };
     });
 

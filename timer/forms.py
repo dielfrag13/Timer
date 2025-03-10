@@ -64,7 +64,7 @@ class OperationInstanceForm(forms.ModelForm):
 # basically, server side validation instead of client side. 
 class StepForm(forms.ModelForm):
 
-    title = forms.CharField(required=True)
+    #title = forms.CharField(required=True)
 
     class Meta:
         model = Step
@@ -98,11 +98,9 @@ class StepForm(forms.ModelForm):
 class CustomStepFormSet(forms.BaseModelFormSet):
     def clean(self):
         has_error = False
-        print("custom step formset clean")
+        #print("custom step formset clean")
         #import code
         #code.interact(local=locals())
-        #if any(self.errors):
-        #    return
         for form in self.forms:
             if not form.cleaned_data.get('title'):
                 if len(form.errors) == 0:
