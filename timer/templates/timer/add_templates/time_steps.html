@@ -16,9 +16,6 @@
                 {{ form.title }}
                 {{ form.end_time }} 
                 {{ form.id }}
-                <!--button class="move-up" type="button">↑</button--> 
-                <!--button class="move-down" type="button">↓</button-->
-                <!--button class="remove" type="button">Remove</button-->
             </div>
         {% endfor %}
     </div>
@@ -32,6 +29,9 @@
         if (document.getElementById('start-button').value == "Start Operation") {
             document.getElementById('start-button').value = "Operation started!";
             document.getElementById('start-time').value = new Date().toTimeString().split(' ')[0];
+            document.getElementById('formset-container').querySelectorAll('.form-row').forEach( fr => 
+                fr.querySelector('input').disabled = false
+            )
         }
     }
 </script>

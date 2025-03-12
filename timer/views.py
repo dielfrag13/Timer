@@ -239,7 +239,7 @@ def operation_creation_step_one(request, operation_instance_id):
             op_inst.save()
             return redirect("timer:ocs2", operation_instance_id=operation_instance_id)
         else:
-            print("formset is not valid!")
+            print("formset is not valid -- ocs1!")
             #import code
             #code.interact(local=locals())
     else:
@@ -268,7 +268,7 @@ def operation_creation_step_two(request, operation_instance_id):
         return redirect('timer:operation_instance_detail', operation_instance_id=operation_instance_id)
 
 
-    StepInstanceFormSet = modelformset_factory(StepInstance, form=StepInstanceForm, extra=0)
+    StepInstanceFormSet = modelformset_factory(StepInstance, form=StepInstanceForm, formset=CustomStepInstanceFormSet, extra=0)
     steps = op_inst.steps.all()
 
     if request.method == "POST":
@@ -289,7 +289,8 @@ def operation_creation_step_two(request, operation_instance_id):
             op_inst.complete = True
             op_inst.save()
             return redirect('timer:operation_instance_detail', operation_instance_id=operation_instance_id)
-            
+        else:
+            print("formset is not valid -- ocs2") 
     else:
         formset = StepInstanceFormSet(queryset=steps)
 
@@ -317,7 +318,7 @@ def TestView(request):
             print("step formset is valid")
             step_formset = StepFormSet(queryset=Step.objects.none())
         else:
-            print("step formset is not valid")
+            print("step formset is not valid-- testview")
         #code.interact(local=locals())
         # reset step formset
     

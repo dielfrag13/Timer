@@ -94,7 +94,6 @@ class StepForm(forms.ModelForm):
         ...
         ...
 """
-# TODO BUG
 class CustomStepFormSet(forms.BaseModelFormSet):
     def clean(self):
         has_error = False
@@ -120,14 +119,41 @@ class CustomStepFormSet(forms.BaseModelFormSet):
             raise forms.ValidationError("Validation errors found in step list.")
 
 
+class CustomStepInstanceFormSet(forms.BaseModelFormSet):
+    def clean(self):
+        has_error = False
+        step_values = []
+        for form in self.forms:
+
+            # ensure all time entries follow sequentially and each step's time is before the next step's time
+            """
+            if form.cleaned_data.get('end_time') in step_values:
+                form.add_error('title', f"field {form.cleaned_data.get('title')} already in step list")
+                has_error = True
+            """
+            # now check to see if there are empty fields
+            if not form.cleaned_data.get('end_time'):
+                if len(form.errors) == 0:
+                    # something else might have added an error to this already... kinda weird
+                    form.add_error('end_time', "this field cannot be empty")
+                has_error = True
+            else:
+                step_values.append(form.cleaned_data.get('end_time'))
+            
+        if has_error:
+            print("raising validation error in customstepformset")
+            raise forms.ValidationError("Validation errors found in step list.")
+        
+
+
 # self.attrs is set within the form widget init
 # the variable 'step_name' is hardcoded in there
 class TimeWidgetWithStepName(forms.Widget):
     def render(self, name, value, attrs=None, renderer=None):
         cs = string.ascii_letters + string.digits
         randId = ''.join(random.choice(cs) for _ in range(10))
-        js2 = f"""document.getElementById('{randId}-field').value=new Date().toTimeString().split(' ')[0]"""        
-        return f'<label>{self.attrs["step_name"]}:</label><input type="time" step="1" name="{name}" id="{randId}-field" required=""> <a href="#" onclick="{js2}">Now</a>'
+        js2 = f"""if (!(document.getElementById('{randId}-field').disabled)) document.getElementById('{randId}-field').value=new Date().toTimeString().split(' ')[0]"""        
+        return f'<label>{self.attrs["step_name"]}:</label><input type="time" step="1" name="{name}" id="{randId}-field" required="" disabled> <a href="#" onclick="{js2}">Now</a>'
 
 # we're only filling out one additional field with the form
 class StepInstanceForm(forms.ModelForm):
