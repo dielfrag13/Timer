@@ -270,11 +270,16 @@ def operation_creation_step_two(request, operation_instance_id):
 
     StepInstanceFormSet = modelformset_factory(StepInstance, form=StepInstanceForm, formset=CustomStepInstanceFormSet, extra=0)
     steps = op_inst.steps.all()
+    saved_data = {}
 
     if request.method == "POST":
         formset = StepInstanceFormSet(request.POST)
         if formset.is_valid():
-
+            # low priority potential bug:
+            # if the user clicks 'start' and then manually sets the first time to be before when the operation started,
+            # then the first step's time calculation will be off. 
+            # formset validation will ensure every step is greater in value than every following step. 
+            # do we want to be able to manually edit the start time?
             start_time = datetime.strptime(request.POST['start-time'], "%H:%M:%S").time()
             current_start_time = start_time
             for form in formset:
@@ -291,12 +296,21 @@ def operation_creation_step_two(request, operation_instance_id):
             return redirect('timer:operation_instance_detail', operation_instance_id=operation_instance_id)
         else:
             print("formset is not valid -- ocs2") 
+            # re-render with the data from the POST request
+            # can't figure out how to do with django, so we write some javascript to do it from saved data
+            # "09:43:44" should be what it looks like
+            for index, data in enumerate(formset):
+                saved_data[index] = data.cleaned_data['end_time'].strftime("%H:%M:%S") if 'end_time' in data.cleaned_data else None
+            saved_data['start-time'] = formset.data['start-time']
+            #import code
+            #code.interact(local=locals())
     else:
         formset = StepInstanceFormSet(queryset=steps)
 
     context = {
         "formset" : formset,
         "operation_instance" : op_inst,
+        "saved_data" : saved_data,
     }
 
     # figure out how to print a part of the formset queryset data in HTML

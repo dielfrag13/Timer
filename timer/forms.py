@@ -125,21 +125,27 @@ class CustomStepInstanceFormSet(forms.BaseModelFormSet):
         step_values = []
         for form in self.forms:
 
-            # ensure all time entries follow sequentially and each step's time is before the next step's time
-            """
-            if form.cleaned_data.get('end_time') in step_values:
-                form.add_error('title', f"field {form.cleaned_data.get('title')} already in step list")
-                has_error = True
-            """
             # now check to see if there are empty fields
             if not form.cleaned_data.get('end_time'):
                 if len(form.errors) == 0:
                     # something else might have added an error to this already... kinda weird
                     form.add_error('end_time', "this field cannot be empty")
                 has_error = True
+                continue
+            # ensure all time entries follow sequentially and each step's time is before the next step's time
+            elif len(step_values) > 0:
+                prior_time = step_values[-1]
+                cur_time = form.cleaned_data.get('end_time')
+                # add this to step values now, because adding an error causes cleaned_data to delete the 'end_time' data
+                # meaning, if adding the error, the code would push 'None' to the array after adding error
+                step_values.append(form.cleaned_data.get('end_time'))
+                if prior_time > cur_time:
+                    print("prior time > cur time, error")
+                    form.add_error('end_time', 'this time cannot be before the prior time')
+                    has_error=True
+                # add values to continue processing for form errors
             else:
                 step_values.append(form.cleaned_data.get('end_time'))
-            
         if has_error:
             print("raising validation error in customstepformset")
             raise forms.ValidationError("Validation errors found in step list.")
@@ -152,7 +158,7 @@ class TimeWidgetWithStepName(forms.Widget):
     def render(self, name, value, attrs=None, renderer=None):
         cs = string.ascii_letters + string.digits
         randId = ''.join(random.choice(cs) for _ in range(10))
-        js2 = f"""if (!(document.getElementById('{randId}-field').disabled)) document.getElementById('{randId}-field').value=new Date().toTimeString().split(' ')[0]"""        
+        js2 = f"""if (!(document.getElementById('{randId}-field').disabled)) document.getElementById('{randId}-field').value=new Date().toTimeString().split(' ')[0]; else alert('Please start operation before editing times')"""        
         return f'<label>{self.attrs["step_name"]}:</label><input type="time" step="1" name="{name}" id="{randId}-field" required="" disabled> <a href="#" onclick="{js2}">Now</a>'
 
 # we're only filling out one additional field with the form

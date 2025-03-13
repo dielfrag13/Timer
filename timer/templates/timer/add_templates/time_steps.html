@@ -16,6 +16,13 @@
                 {{ form.title }}
                 {{ form.end_time }} 
                 {{ form.id }}
+                {% for field in form %}
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                        <p class="text-danger">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
             </div>
         {% endfor %}
     </div>
@@ -33,7 +40,16 @@
                 fr.querySelector('input').disabled = false
             )
         }
-    }
+    };
+    {% for key, value in saved_data.items %}
+        {% if key == "start-time" %}
+            document.getElementById('start-button').click();
+            document.getElementById('start-time').value = "{{ value }}";
+        {% else %}
+            document.getElementById('formset-container').children[{{ key }}].querySelector('input').value = "{{ value }}";
+        {% endif %}
+    {% endfor %}
+
 </script>
 
 
