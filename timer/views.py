@@ -141,8 +141,7 @@ def surgeon_detail(request, surgeon_id):
 
 
 def operation_type_detail(request, operation_id):
-    thing = get_object_or_404(OperationType, pk=operation_id)
-
+    this_operation_type = get_object_or_404(OperationType, pk=operation_id)
     if request.method == "POST":
         operation_type_form = OperationTypeForm(request.POST)
         if operation_type_form.is_valid():
@@ -150,7 +149,8 @@ def operation_type_detail(request, operation_id):
             return redirect('timer:operation_type_detail', operation_id=newOperationType.id)
     else:
         operation_type_form = OperationTypeForm()
-
+    
+    operation_instance_entries = OperationInstance.objects.filter(operation_type=this_operation_type)
     """
     qs = TimerEntry.objects.filter(operation__id=operation_id)
     if qs:
@@ -162,8 +162,10 @@ def operation_type_detail(request, operation_id):
     """
 
     context = {
-        "operationEntry" : thing, 
-        "operation_type_form" : operation_type_form,
+        "this_operation_type" : this_operation_type,
+        #"operation_type_form" : operation_type_form,
+        "operation_instance_entries_table" : OperationInstanceTable(operation_instance_entries),
+
     }
     return render(request, "timer/entry_details/operation_entry_detail.html", context)
 
@@ -178,6 +180,25 @@ def operation_instance_detail(request, operation_instance_id):
         else:
             return redirect('timer:ocs1', operation_instance_id=operation_instance_id)
 
+    # calculate the distance from average from the perspective of each individual step instance
+    for step_instance in op_inst.steps.all():
+        # get all step instances of this step type
+        # can get all step instances for this type, or just the ones referring to this individual surgeon
+        # ask darrin which
+
+        # option: ALL step instances, from all surgeries (and all surgeons)
+        #all_step_instances = StepInstance.objects.filter(step=step_instance.step)
+
+        # option: step instances associated solely with this operation's surgeon
+        all_step_instances = StepInstance.objects.filter(step=step_instance.step, operation_instance__surgeon=op_inst.surgeon)
+
+        if all_step_instances:
+            asi_nums = all_step_instances.values_list("elapsed_time", flat=True)
+            avg = sum(asi_nums) / len(asi_nums)
+            percentage_str = f"{(((step_instance.elapsed_time - avg) / avg)*100):.2f}%"
+            step_instance.dist_from_average = percentage_str
+            step_instance.save()
+    
     context = {
         "operation_instance" : op_inst,
         "operation_instance_table" : OperationInstanceTable(OperationInstance.objects.filter(pk=op_inst.pk)),
@@ -222,10 +243,6 @@ def operation_creation_step_one(request, operation_instance_id):
                     new_model = Step(title=form.cleaned_data['title'])
                     new_model.save()
                     step = new_model
-                # this just errors out the server itself
-                #elif 'title' not in form.cleaned_data:
-                #    raise forms.ValidationError("Field cannot be blank")
-                #    print("this shouldn't happen")
                 else:
                     if form.is_valid():
                         form.save()

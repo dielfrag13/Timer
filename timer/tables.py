@@ -49,7 +49,6 @@ class StepInstanceTable(tables.Table):
         return value.strftime("%I:%M %p")
 
     def render_elapsed_time(self, value):
-        print(f"elapsed time value: {value}")
         return f"{value//3600:02}:{(value%3600)//60:02}:{value%60:02}"
 
     def render_dist_from_average(self, value, column):

@@ -1,20 +1,20 @@
 {% load render_table from django_tables2 %}
 {% include 'timer/header.html' %}
 
-<h1>Operation type: {{ operationEntry }}</h1>
+<h1>Operation type: {{ this_operation_type }}</h1>
 
-{% if operationTimerEntries %}
-    {% render_table timerEntryTable %}
+{% if operation_instance_entries_table %}
+    {% render_table operation_instance_entries_table %}
 
 <!--{% for entry in operationTimerEntries %}
     <li><a href="{% url 'timer:timer_entry_detail' entry.id %}">{{ entry.title }}</a></li>
 {% endfor %}-->
 {% else %}
-<p>No timer entries for this operation type have been saved yet.</p>
+<p>No instances of this operation have been saved yet.</p>
 {% endif %}
 
 
-<a href="{% url 'timer:update_operation_entry' operationEntry.id %}" class="btn btn-info">Update operation entry</a>
-<a href="{% url 'timer:delete_operation' operationEntry.id %}" class="btn btn-danger">Delete operation entry</a>
+<a href="{% url 'timer:update_operation_entry' this_operation_type.id %}" class="btn btn-info">Update operation type</a>
+<a href="{% url 'timer:delete_operation' this_operation_type.id %}" class="btn btn-danger">Delete operation type</a>
 
 {% include 'timer/footer.html' %}

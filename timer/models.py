@@ -19,7 +19,7 @@ class Surgeon(models.Model):
 
     # used in the update class-based view to redirect on success
     def get_absolute_url(self):
-        return reverse('timer:surgeon_entry_detail', args=(self.pk,))
+        return reverse('timer:surgeon_detail', args=(self.pk,))
     
     def __str__(self):
         return "{} {}".format(self.first_name, self.last_name)
@@ -36,7 +36,7 @@ class OperationType(models.Model):
 
     # used in the update class-based view to redirect on success
     def get_absolute_url(self):
-        return reverse('timer:operation_entry_detail', args=(self.pk,))
+        return reverse('timer:operation_type_detail', args=(self.pk,))
 
     def __str__(self):
         return "{}".format(self.operation_type)
