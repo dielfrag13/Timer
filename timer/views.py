@@ -187,14 +187,19 @@ def operation_instance_detail(request, operation_instance_id):
         # ask darrin which
 
         # option: ALL step instances, from all surgeries (and all surgeons)
-        #all_step_instances = StepInstance.objects.filter(step=step_instance.step)
+        #all_step_instances = StepInstance.objects.filter(step__title=step_instance.step.title)
 
         # option: step instances associated solely with this operation's surgeon
-        all_step_instances = StepInstance.objects.filter(step=step_instance.step, operation_instance__surgeon=op_inst.surgeon)
+        all_step_instances = StepInstance.objects.filter(step__title=step_instance.step.title, operation_instance__surgeon=op_inst.surgeon)
 
         if all_step_instances:
             asi_nums = all_step_instances.values_list("elapsed_time", flat=True)
             avg = sum(asi_nums) / len(asi_nums)
+            #print("si: " + step_instance.__str__())
+            #import code
+            #code.interact(local=locals())
+            if (avg == 0):
+                percentage_str = "N/A"
             percentage_str = f"{(((step_instance.elapsed_time - avg) / avg)*100):.2f}%"
             step_instance.dist_from_average = percentage_str
             step_instance.save()
