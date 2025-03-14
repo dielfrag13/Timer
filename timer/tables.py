@@ -30,7 +30,7 @@ class SurgeonTable(tables.Table):
 class OperationInstanceTable(tables.Table):
 
     def render_elapsed_time(self, value):
-        return f"{value//3600:02}:{(value%3600)//3600:02}:{value%60:02}"
+        return f"{value//3600:02}:{(value%3600)//60:02}:{value%60:02}"
 
     operation_type = tables.LinkColumn('timer:operation_instance_detail', args=[tables.A('pk')])
     surgeon = tables.LinkColumn('timer:surgeon_detail', args=[tables.A('surgeon__pk')])
@@ -50,7 +50,7 @@ class StepInstanceTable(tables.Table):
 
     def render_elapsed_time(self, value):
         print(f"elapsed time value: {value}")
-        return f"{value//3600:02}:{(value%3600)//3600:02}:{value%60:02}"
+        return f"{value//3600:02}:{(value%3600)//60:02}:{value%60:02}"
 
     def render_dist_from_average(self, value, column):
         if value[0] == "-":

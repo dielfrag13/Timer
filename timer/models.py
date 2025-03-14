@@ -32,9 +32,6 @@ class OperationType(models.Model):
 
     @property
     def operation_count(self):
-        print("models.py operation count")
-        import code
-        code.interact(local=locals())
         return OperationInstance.objects.filter(operation_type=self, complete=True).count()
 
     # used in the update class-based view to redirect on success
