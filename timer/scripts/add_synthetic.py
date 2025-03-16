@@ -12,7 +12,7 @@ surgery_type_3 = "Synthetic Femur Upgrade"
 
 def new_knee(surgeon):
     print("creating new " + surgery_type_2)
-    knee_step_list = ["in-room", "block done", "tubed", "prepped/draped", "time-out", "incision", "parts in", "closure end", "out of room"]
+    knee_step_list = ["block done", "tubed", "prepped/draped", "time-out", "incision", "parts in", "closure end", "out of room"]
     for s in knee_step_list:
         Step.objects.get_or_create(title=s)
 
@@ -45,7 +45,7 @@ def new_knee(surgeon):
 
 def new_femur(surgeon):
     print("creating new " + surgery_type_3)
-    femur_step_list = ["in-room", "patient hydrochloroformed", "beer shotgunned", "leg removed", "time-out", "new femur installed on leg", "leg re-appended", "closure end", "out of room"]
+    femur_step_list = ["patient hydrochloroformed", "beer shotgunned", "leg removed", "time-out", "new femur installed on leg", "leg re-appended", "closure end", "out of room"]
     for s in femur_step_list:
         Step.objects.get_or_create(title=s)
 
@@ -81,7 +81,7 @@ def new_femur(surgeon):
 
 def new_finger(surgeon):
     print("creating new " + surgery_type_1)
-    finger_step_list = ["in-room", "patient sedated", "finger identified", "beer shotgunned", "finger augmented", "qc approved", "closure end", "out of room"]
+    finger_step_list = ["patient sedated", "finger identified", "beer shotgunned", "finger augmented", "qc approved", "closure end", "out of room"]
     for s in finger_step_list:
         Step.objects.get_or_create(title=s)
 

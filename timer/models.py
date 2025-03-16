@@ -12,7 +12,7 @@ class Surgeon(models.Model):
     def operation_count(self):
         return OperationInstance.objects.filter(surgeon=self, complete=True).count()
 
-    # for minimal table
+    # for minimal table and data export
     @property
     def full_name(self):
         return "{} {}".format(self.first_name, self.last_name)
@@ -23,7 +23,6 @@ class Surgeon(models.Model):
     
     def __str__(self):
         return "{} {}".format(self.first_name, self.last_name)
-
 
 
 class OperationType(models.Model):

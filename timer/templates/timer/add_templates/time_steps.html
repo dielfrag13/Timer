@@ -2,7 +2,7 @@
 
 <h2>Mark times for {{ operation_instance }}</h2>
 
-<input class="btn btn-success" id="start-button" name="start_button" value="Start Operation">
+<input class="btn btn-success" id="start-button" name="start_button" value="In-room">
 
 <br>
 
@@ -33,7 +33,7 @@
 
 <script>
     document.getElementById('start-button').onclick = function() {
-        if (document.getElementById('start-button').value == "Start Operation") {
+        if (document.getElementById('start-button').value == "In-room") {
             document.getElementById('start-button').value = "Operation started!";
             document.getElementById('start-time').value = new Date().toTimeString().split(' ')[0];
             document.getElementById('formset-container').querySelectorAll('.form-row').forEach( fr => 

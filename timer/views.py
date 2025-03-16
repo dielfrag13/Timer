@@ -192,6 +192,11 @@ def operation_instance_detail(request, operation_instance_id):
         # option: step instances associated solely with this operation's surgeon
         all_step_instances = StepInstance.objects.filter(step__title=step_instance.step.title, operation_instance__surgeon=op_inst.surgeon)
 
+        all_step_instances = StepInstance.objects.filter(
+            step__title=step_instance.step.title, 
+            operation_instance__surgeon=op_inst.surgeon,
+            operation_instance__operation_type__operation_type=op_inst.operation_type.operation_type,
+        )
         if all_step_instances:
             asi_nums = all_step_instances.values_list("elapsed_time", flat=True)
             avg = sum(asi_nums) / len(asi_nums)
@@ -200,7 +205,8 @@ def operation_instance_detail(request, operation_instance_id):
             #code.interact(local=locals())
             if (avg == 0):
                 percentage_str = "N/A"
-            percentage_str = f"{(((step_instance.elapsed_time - avg) / avg)*100):.2f}%"
+            else:
+                percentage_str = f"{(((step_instance.elapsed_time - avg) / avg)*100):.2f}%"
             step_instance.dist_from_average = percentage_str
             step_instance.save()
     
@@ -223,13 +229,15 @@ def operation_creation_step_one(request, operation_instance_id):
         return redirect('timer:ocs2', operation_instance_id=operation_instance_id)
 
     # if there are steps associated with this operation instance type, we want no extra elements.
-    if StepInstance.objects.filter(operation_instance__operation_type=op_inst.operation_type).count() > 0:
+    if StepInstance.objects.filter(
+            operation_instance__operation_type=op_inst.operation_type,
+            operation_instance__surgeon=op_inst.surgeon
+        ).count() > 0:
         StepFormSet = modelformset_factory(Step, form=StepForm, formset=CustomStepFormSet, extra=0)
         print("extra is 0")
     else:
         StepFormSet = modelformset_factory(Step, form=StepForm, formset=CustomStepFormSet, extra=1)
         print("extra is 1")
-    #StepFormSet = modelformset_factory(Step, fields=["title",], extra=0)
 
     # TODO bug: if you delete one step and then add a new step, double bug. 
     if request.method == "POST":
@@ -269,7 +277,14 @@ def operation_creation_step_one(request, operation_instance_id):
         if most_recent_op:
             formset = StepFormSet(queryset=Step.objects.filter(instances__in=most_recent_op.steps.all()))
         else:
-            formset=StepFormSet(queryset=Step.objects.none())
+            qs = OperationInstance.objects.filter(complete=True, operation_type__operation_type=op_inst.operation_type.operation_type)
+            if qs:
+                qs = qs.last().steps.all()
+            
+            if qs:
+                formset=StepFormSet(queryset=Step.objects.filter(instances__in=qs))
+            else:
+                formset=StepFormSet(queryset=Step.objects.none())
     context = {
         "formset" : formset,
         "operation_instance" : op_inst,
