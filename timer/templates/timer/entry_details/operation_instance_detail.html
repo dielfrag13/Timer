@@ -7,4 +7,9 @@
     <br>
     {% render_table step_instance_table %}
 
+<div class="flex items-center">
+    <a href="{% url 'timer:operation_download' operation_instance.id %}" class="btn btn-info">Download CSV of this operation</a>
+
+</div>
+
 {% include 'timer/footer.html' %}

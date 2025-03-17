@@ -11,6 +11,7 @@ from django.core.exceptions import ValidationError
 from .models import Surgeon, OperationType
 from .forms import *
 from .tables import *
+from .resources import *
 
 from datetime import datetime, date
 
@@ -168,6 +169,17 @@ def operation_type_detail(request, operation_id):
 
     }
     return render(request, "timer/entry_details/operation_entry_detail.html", context)
+
+def operation_download(request, operation_instance_id):
+   # Create an HTTP response with CSV content
+    op_inst = get_object_or_404(OperationInstance, id=operation_instance_id)
+    steps = Step.objects.filter(instances__in=op_inst.steps.all())
+    oir = OperationInstanceResource(steps)
+    csv_data = oir.export([op_inst]).csv
+    response = HttpResponse(csv_data, content_type="text/csv")
+    filename = f"{op_inst.operation_type.operation_type} {op_inst.date.strftime('%Y-%m-%d')}.csv"
+    response["Content-Disposition"] = f'attachment; filename={filename}'
+    return response
 
 
 def operation_instance_detail(request, operation_instance_id):
