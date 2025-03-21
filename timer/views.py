@@ -151,7 +151,7 @@ def operation_type_detail(request, operation_id):
     else:
         operation_type_form = OperationTypeForm()
     
-    operation_instance_entries = OperationInstance.objects.filter(operation_type=this_operation_type)
+    operation_instance_entries = OperationInstance.objects.filter(operation_type=this_operation_type, complete=True)
     """
     qs = TimerEntry.objects.filter(operation__id=operation_id)
     if qs:
@@ -208,13 +208,11 @@ def operation_instance_detail(request, operation_instance_id):
             step__title=step_instance.step.title, 
             operation_instance__surgeon=op_inst.surgeon,
             operation_instance__operation_type__operation_type=op_inst.operation_type.operation_type,
+            operation_instance__complete = True
         )
         if all_step_instances:
             asi_nums = all_step_instances.values_list("elapsed_time", flat=True)
             avg = sum(asi_nums) / len(asi_nums)
-            #print("si: " + step_instance.__str__())
-            #import code
-            #code.interact(local=locals())
             if (avg == 0):
                 percentage_str = "N/A"
             else:
@@ -406,6 +404,12 @@ class DeleteOperationView(DeleteView):
     model = OperationType
     success_url=reverse_lazy("timer:operation_types")
     template_name="timer/confirm_delete.html"
+
+class DeleteOperationInstanceView(DeleteView):
+    model = OperationInstance
+    success_url=reverse_lazy("timer:operation_types")
+    template_name="timer/confirm_delete.html"
+
 
 # Update views
 """

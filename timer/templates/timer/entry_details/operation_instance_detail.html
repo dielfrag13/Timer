@@ -9,7 +9,7 @@
 
 <div class="flex items-center">
     <a href="{% url 'timer:operation_download' operation_instance.id %}" class="btn btn-info">Download CSV of this operation</a>
-
+    <a href="{% url 'timer:delete_operation_instance' operation_instance.id %}" class="btn btn-danger">Delete operation instance</a>
 </div>
 
 {% include 'timer/footer.html' %}
