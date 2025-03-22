@@ -33,6 +33,22 @@ class SurgeonForm(forms.ModelForm):
         model = Surgeon
         fields = ['first_name', 'last_name', 'email']
 
+    def clean(self):
+        cleaned_data = super().clean()
+        first_name = cleaned_data.get('first_name', '').strip().lower()
+        last_name = cleaned_data.get('last_name', '').strip().lower()
+        email = cleaned_data.get('email', '').strip().lower()
+
+        if Surgeon.objects.filter(
+            first_name__iexact=first_name,
+            last_name__iexact=last_name,
+            email__iexact=email
+        ).exists():
+            raise forms.ValidationError('A surgeon with the same name and email already exists')
+
+        return cleaned_data
+
+
 
 class DateInput(forms.DateTimeInput, forms.Widget):
     input_type = 'date'
@@ -100,19 +116,18 @@ class CustomStepFormSet(forms.BaseModelFormSet):
         step_values = []
         for form in self.forms:
 
-            # check for duplicate step names
-            if form.cleaned_data.get('title') in step_values:
-                form.add_error('title', f"field {form.cleaned_data.get('title')} already in step list")
-                has_error = True
-            
-            # now check to see if there are empty fields
-            elif not form.cleaned_data.get('title'):
+            # check to see if there are empty fields
+            if not form.cleaned_data.get('title'):
                 if len(form.errors) == 0:
                     # something else might have added an error to this already... kinda weird
                     form.add_error('title', "this field cannot be empty")
                 has_error = True
+            # now check for duplicate step names
+            elif form.cleaned_data.get('title').lower() in step_values:
+                form.add_error('title', f"field {form.cleaned_data.get('title')} already in step list")
+                has_error = True
             else:
-                step_values.append(form.cleaned_data.get('title'))
+                step_values.append(form.cleaned_data.get('title').lower())
             
         if has_error:
             print("raising validation error in customstepformset")

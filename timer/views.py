@@ -20,6 +20,10 @@ def index(request):
     surgeon_list = Surgeon.objects.all().order_by('-pk')[:5]
     operation_list = OperationType.objects.all().order_by('-pk')[:5]
 
+    surgeonForm = SurgeonForm()
+    operationTypeForm = OperationTypeForm()
+    operationInstanceForm = OperationInstanceForm()
+
     if request.method == "POST":
         isSurgeon = False
         isOperation = False
@@ -49,12 +53,6 @@ def index(request):
             if newOperationTypeForm.is_valid():
                 newOperationType = newOperationTypeForm.save()
                 return redirect('timer:index')
-
-
-    else:
-        surgeonForm = SurgeonForm()
-        operationTypeForm = OperationTypeForm()
-        operationInstanceForm = OperationInstanceForm()
 
     context = {
         "surgeon_list" : surgeon_list,

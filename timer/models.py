@@ -1,12 +1,15 @@
 from django.db import models
+from django.db.models import UniqueConstraint
+from django.db.models.functions import Lower
 from django.urls import reverse
+
 import datetime
 
 # Create your models here.
 class Surgeon(models.Model):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    email = models.EmailField(max_length=254)
+    email = models.EmailField(max_length=254, unique=True)
 
     @property
     def operation_count(self):
@@ -23,11 +26,20 @@ class Surgeon(models.Model):
     
     def __str__(self):
         return "{} {}".format(self.first_name, self.last_name)
+    
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                Lower('first_name'),
+                Lower('last_name'),
+                name="unique_case_insensitive_surgeon"
+            )
+        ]
 
 
 class OperationType(models.Model):
     """Represents a type of operation (e.g. Sixth finger augmentation, SmartFemur replacement)"""
-    operation_type = models.CharField(max_length=100)
+    operation_type = models.CharField(max_length=100, unique=True)
 
     @property
     def operation_count(self):
@@ -40,6 +52,13 @@ class OperationType(models.Model):
     def __str__(self):
         return "{}".format(self.operation_type)
 
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                Lower('operation_type'),
+                name="unique_case_insensitive_operation_type",
+            )
+        ]
 
 
 class OperationInstance(models.Model):
@@ -82,12 +101,19 @@ class Step(models.Model):
     """
 
     # 50 characters to title this step
-    title = models.CharField(max_length=50)
+    title = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return self.title
     # 'instances' field comes from StepInstance 
 
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                Lower('title'),
+                name="unique_case_insensitive_step"
+            )
+        ]
 
 class StepInstance(models.Model):
     """Each instance of a step is timed. These are the new Timer Entries"""
