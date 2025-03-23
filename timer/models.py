@@ -81,6 +81,10 @@ class OperationInstance(models.Model):
     ocs1 = models.BooleanField(default=False)
     complete = models.BooleanField(default=False)
 
+    # used in the update class-based view to redirect on success
+    def get_absolute_url(self):
+        return reverse('timer:operation_instance_detail', args=(self.pk,))
+    
     elapsed_time = models.IntegerField(null=True, default=None)
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

@@ -48,7 +48,7 @@ class OperationInstanceResource(resources.ModelResource):
         fields = (
             "operation_type", #fk
             "date",
-            # "detail",
+            "detail",
             "surgeon", #fk
             "elapsed_time",
         )

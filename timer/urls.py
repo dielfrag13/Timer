@@ -18,6 +18,7 @@ urlpatterns = [
     #path("updateTimer/<int:pk>/", views.TimerUpdateView.as_view(), name="update_timer_entry"),
     path("updateSurgeon/<int:pk>/", views.SurgeonUpdateView.as_view(), name="update_surgeon_entry"),
     path("updateOperation/<int:pk>/", views.OperationUpdateView.as_view(), name="update_operation_entry"),
+    path("updateOperationInstance/<int:pk>/", views.OperationInstanceUpdateView.as_view(), name="update_operation_instance_entry"),
     path("download_operation/<int:operation_instance_id>/", views.operation_download, name="operation_download"),
     path("delete_surgeon/<int:pk>/", views.DeleteSurgeonView.as_view(), name="delete_surgeon"),
     #path("delete_timer/<int:pk>/", views.DeleteTimerView.as_view(), name="delete_timer"),

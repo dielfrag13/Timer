@@ -429,6 +429,11 @@ class OperationUpdateView(UpdateView):
     #form_class = TimerEntryForm
     template_name = "timer/update_templates/update_form.html"
 
+class OperationInstanceUpdateView(UpdateView):
+    model = OperationInstance
+    fields = ['operation_type', 'date', 'detail', 'surgeon' ]
+    #form_class = TimerEntryForm
+    template_name = "timer/update_templates/update_form.html"
 
 def redirect_to_timer(request):
     return redirect("timer:index")
