@@ -1,0 +1,71 @@
+{% include 'timer/header.html' %}
+
+
+<form method="post">
+    {% csrf_token %}
+    {{ single_form.as_p }}
+    <button type="submit" class="btn btn-info"> Begin new operation</button>
+</form>
+<br><br>
+<form method="post">
+    {% csrf_token %}
+    {{ step_formset.management_form }}
+    <div id="formset-container">
+        {% for form in step_formset %}
+            <div class="form-row"> 
+                {{ form.title }} 
+                {{ form.id }}
+                <!--button class="move-up" type="button">↑</button--> 
+                <!--button class="move-down" type="button">↓</button-->
+                <button class="remove" type="button">Remove</button>
+            </div>
+            {% for field in form %}
+                {% if field.errors %}
+                    {% for error in field.errors %}
+                    <p class="text-danger">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    </div>
+    <button type="button" id="add-form">Add Another Step</button>
+    <button type="submit">Submit</button>
+</form>
+
+<script>
+    document.getElementById('add-form').onclick = function() {
+        // get the container with the forms (i.e. each step field)
+        var container = document.getElementById('formset-container');
+        // clone the 0th element into a variable
+        var newForm = container.children[0].cloneNode(true);
+        newForm.querySelectorAll('input').forEach(input => {
+            //input.value = document.getElementById('formset-container').querySelectorAll('div').length;
+            input.value = '';
+            input.name = input.name.replace(/\d+/, container.children.length); // Update index
+            input.id = input.id.replace(/\d+/, container.children.length);
+        });
+        // add the remove button code
+        newForm.querySelector('.remove').onclick = function() {
+            if ((document.getElementById('id_form-TOTAL_FORMS').value) > 1) {
+                const formRow = this.parentNode;
+                formRow.parentNode.removeChild(formRow);
+                document.getElementById('id_form-TOTAL_FORMS').value = document.getElementById('formset-container').querySelectorAll('div').length;
+            }
+        };
+        container.appendChild(newForm);
+        document.getElementById('id_form-TOTAL_FORMS').value = document.getElementById('formset-container').querySelectorAll('div').length;
+        // need to do a replace on the value of document.getElementById('id_form-TOTAL_FORMS') to be the new form count length
+    };
+    // on page init, add functionality to all remove buttons
+    document.querySelectorAll('.remove').forEach(button => {
+        button.onclick = function() {
+            if ((document.getElementById('id_form-TOTAL_FORMS').value) > 1) {
+                const formRow = this.parentNode;
+                formRow.parentNode.removeChild(formRow);
+                document.getElementById('id_form-TOTAL_FORMS').value = document.getElementById('formset-container').querySelectorAll('div').length;
+            }
+        };
+    });
+</script>
+
+{% include 'timer/footer.html' %}

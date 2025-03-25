@@ -1,0 +1,18 @@
+{% load render_table from django_tables2 %}
+{% include 'timer/header.html' %}
+
+<h2>Operation Instance {{ operation_instance.operation_type.operation_type }}</h2>
+
+<p>{{ operation_instance.detail }}</p>
+    {% render_table operation_instance_table %}
+    <h3>Operation details</h3>
+    {% render_table step_instance_table %}
+
+<div class="flex items-center">
+    <a href="{% url 'timer:operation_download' operation_instance.id %}" class="btn btn-secondary">Download CSV of this operation</a>
+    <br><br>
+    <a href="{% url 'timer:update_operation_instance_entry' operation_instance.id %}" class="btn btn-info">Update operation instance</a>
+    <a href="{% url 'timer:delete_operation_instance' operation_instance.id %}" class="btn btn-danger">Delete operation instance</a>
+</div>
+
+{% include 'timer/footer.html' %}

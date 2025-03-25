@@ -1,0 +1,117 @@
+{% include 'timer/header.html' %}
+
+<h2>Edit steps for new operation {{ operation_instance }}</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ formset.management_form }}
+    <div id="formset-container">
+        {% for form in formset %}
+            <div class="form-row">
+                {{ form.title }} 
+                {{ form.id }}
+                <!--button class="move-up" type="button">↑</button--> 
+                <!--button class="move-down" type="button">↓</button-->
+                <button class="remove" type="button">Remove</button>
+            {% for field in form %}
+                {% if field.errors %}
+                    {% for error in field.errors %}
+                    <p class="text-danger">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+    <button type="button" id="add-form">Add Another Step</button>
+    <button type="submit">Submit</button>
+</form>
+
+<script>
+    document.getElementById('add-form').onclick = function() {
+        // get the container with the forms (i.e. each step field)
+        var container = document.getElementById('formset-container');
+        // clone the 0th element into a variable
+        var newForm = container.children[0].cloneNode(true);
+        newForm.querySelectorAll('input').forEach(input => {
+            //input.value = document.getElementById('formset-container').querySelectorAll('div').length;
+            input.value = '';
+            input.name = input.name.replace(/\d+/, container.children.length); // Update index
+            input.id = input.id.replace(/\d+/, container.children.length);
+        });
+        // add the remove button code
+        newForm.querySelector('.remove').onclick = function() {
+            if ((document.getElementById('id_form-TOTAL_FORMS').value) > 1) {
+                const formRow = this.parentNode;
+                formRow.parentNode.removeChild(formRow);
+                document.getElementById('id_form-TOTAL_FORMS').value = document.getElementById('formset-container').querySelectorAll('div').length;
+                // reset all the IDs of the formset
+                var id = 0
+                document.getElementById('formset-container').querySelectorAll('.form-row').forEach(formrow => {
+                    formrow.querySelector('input').id = `id_form-${id}-title`;
+                    formrow.querySelector('input').name = `form-${id}-title`;
+                    id += 1;
+                })
+            };
+        };
+        /*
+        document.getElementById('formset-container').querySelectorAll('.form-row').forEach(formrow => {
+  console.log(formrow.querySelector('input'));
+})
+  */
+        container.appendChild(newForm);
+        document.getElementById('id_form-TOTAL_FORMS').value = document.getElementById('formset-container').querySelectorAll('div').length;
+        // need to do a replace on the value of document.getElementById('id_form-TOTAL_FORMS') to be the new form count length
+    };
+    // on page init, add functionality to all remove buttons
+    document.querySelectorAll('.remove').forEach(button => {
+        button.onclick = function() {
+            if ((document.getElementById('id_form-TOTAL_FORMS').value) > 1) {
+                const formRow = this.parentNode;
+                formRow.parentNode.removeChild(formRow);
+                document.getElementById('id_form-TOTAL_FORMS').value = document.getElementById('formset-container').querySelectorAll('div').length;
+                // reset all the IDs of the formset
+                var id = 0
+                document.getElementById('formset-container').querySelectorAll('.form-row').forEach(formrow => {
+                    formrow.querySelector('input').id = `id_form-${id}-title`;
+                    formrow.querySelector('input').name = `form-${id}-title`;
+                    id += 1;
+                })
+            };
+        };
+    });
+
+    // Add event listeners for move buttons and remove buttons
+    // Additional JavaScript logic needed for moving and removing forms.
+    // what it looks like on initial after adding a couple entries, when it works properly:
+    /*
+<div id="formset-container">
+        
+            <div class="form-row">
+                <input type="text" name="form-0-title" maxlength="50" id="id_form-0-title"> 
+                <input type="hidden" name="form-0-id" id="id_form-0-id">
+                <button class="move-up" type="button">↑</button> 
+                <button class="move-down" type="button">↓</button>
+                <button class="remove" type="button">Remove</button>
+            </div>
+        
+            <div class="form-row">
+                <input type="text" name="form-1-title" maxlength="50" id="id_form-1-title"> 
+                <input type="hidden" name="form-1-id" id="id_form-1-id" value="">
+                <button class="move-up" type="button">↑</button> 
+                <button class="move-down" type="button">↓</button>
+                <button class="remove" type="button">Remove</button>
+            </div>
+            <div class="form-row">
+                <input type="text" name="form-2-title" maxlength="50" id="id_form-2-title"> 
+                <input type="hidden" name="form-2-id" id="id_form-2-id" value="">
+                <button class="move-up" type="button">↑</button> 
+                <button class="move-down" type="button">↓</button>
+                <button class="remove" type="button">Remove</button>
+            </div></div>
+    */
+</script>
+
+
+
+
+{% include 'timer/footer.html' %}

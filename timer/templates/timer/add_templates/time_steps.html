@@ -1,0 +1,56 @@
+{% include 'timer/header.html' %}
+
+<h2>Mark times for {{ operation_instance }}</h2>
+
+<input class="btn btn-success" id="start-button" name="start_button" value="In-room">
+
+<br>
+
+<form method="post">
+    {% csrf_token %}
+    {{ formset.management_form }}
+    <input type="hidden" id="start-time" name="start-time" value="">
+    <div id="formset-container">
+        {% for form in formset %}
+            <div class="form-row">
+                {{ form.title }}
+                {{ form.end_time }} 
+                {{ form.id }}
+                {% for field in form %}
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                        <p class="text-danger">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+    <button type="submit">Submit</button>
+</form>
+
+
+
+<script>
+    document.getElementById('start-button').onclick = function() {
+        if (document.getElementById('start-button').value == "In-room") {
+            document.getElementById('start-button').value = "Operation started!";
+            document.getElementById('start-time').value = new Date().toTimeString().split(' ')[0];
+            document.getElementById('formset-container').querySelectorAll('.form-row').forEach( fr => 
+                fr.querySelector('input').disabled = false
+            )
+        }
+    };
+    {% for key, value in saved_data.items %}
+        {% if key == "start-time" %}
+            document.getElementById('start-button').click();
+            document.getElementById('start-time').value = "{{ value }}";
+        {% else %}
+            document.getElementById('formset-container').children[{{ key }}].querySelector('input').value = "{{ value }}";
+        {% endif %}
+    {% endfor %}
+
+</script>
+
+
+{% include 'timer/footer.html' %}

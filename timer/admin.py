@@ -1,6 +1,6 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import TimerEntry
+#from .models import TimerEntry
 
-admin.site.register(TimerEntry)
+#admin.site.register(TimerEntry)

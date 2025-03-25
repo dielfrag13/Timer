@@ -2,14 +2,7 @@
 {% include 'timer/header.html' %}
 
 <h1>Surgeons</h1>
-{% render_table surgeonEntryTable %}
+{% render_table surgeon_table %}
 <br>
-<!--
-{% for surgeon_entry in surgeon_list %}
-        <li><a href="{% url 'timer:surgeon_entry_detail' surgeon_entry.id %}">{{ surgeon_entry }}</a></li>
-{% endfor %}
--->
-<!--
-{% include 'timer/add_templates/add_new_surgeon.html' %}
--->
+
 {% include 'timer/footer.html' %}

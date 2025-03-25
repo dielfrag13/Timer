@@ -1,30 +1,71 @@
 import django_tables2 as tables
-from .models import TimerEntry, SurgeonEntry, OperationEntry
+from .models import Surgeon, OperationType, OperationInstance, StepInstance, Step
 
-class OperationEntryTable(tables.Table):
-    operation_type = tables.LinkColumn('timer:operation_entry_detail', args=[tables.A('pk')])
+
+
+class OperationTypeTable(tables.Table):
+    operation_type = tables.LinkColumn('timer:operation_type_detail', args=[tables.A('pk')])
+    
     class Meta:
-        model = OperationEntry
-        fields = ('operation_type', 'surgery_count')
+        model = OperationType
+        fields = ('operation_type', 'operation_count')
         attrs = {'class': 'table table-striped table-hover'}
 
 
-class SurgeonEntryTableMinimal(tables.Table):
-    full_name = tables.LinkColumn('timer:surgeon_entry_detail', args=[tables.A('pk')])
+class SurgeonTableMinimal(tables.Table):
+    #full_name = tables.LinkColumn('timer:surgeon_entry_detail', args=[tables.A('pk')])
     class Meta:
-        model = SurgeonEntry
+        model = Surgeon
         fields = ('full_name', 'email')
         attrs = {'class': 'table table-striped table-hover'}
 
 
-class SurgeonEntryTable(tables.Table):
-    first_name = tables.LinkColumn('timer:surgeon_entry_detail', args=[tables.A('pk')])
+class SurgeonTable(tables.Table):
+    first_name = tables.LinkColumn('timer:surgeon_detail', args=[tables.A('pk')])
     class Meta:
-        model = SurgeonEntry
-        fields = ('first_name', 'last_name', 'email', 'surgery_count')
+        model = Surgeon
+        fields = ('first_name', 'last_name', 'email', 'operation_count')
         attrs = {'class': 'table table-striped table-hover'}
 
+class OperationInstanceTable(tables.Table):
 
+    def render_elapsed_time(self, value):
+        return f"{value//3600:02}:{(value%3600)//60:02}:{value%60:02}"
+
+    operation_type = tables.LinkColumn('timer:operation_instance_detail', args=[tables.A('pk')])
+    surgeon = tables.LinkColumn('timer:surgeon_detail', args=[tables.A('surgeon__pk')])
+
+    class Meta:
+        model = OperationInstance
+        fields = ('operation_type', 'date', 'surgeon', 'elapsed_time',)
+        attrs = {'class': 'table table-striped table-hover'}
+
+class StepInstanceTable(tables.Table):
+
+    def render_start_time(self, value):
+        return value.strftime("%I:%M %p")
+
+    def render_end_time(self, value):
+        return value.strftime("%I:%M %p")
+
+    def render_elapsed_time(self, value):
+        return f"{value//3600:02}:{(value%3600)//60:02}:{value%60:02}"
+
+    def render_dist_from_average(self, value, column):
+        if value[0] == "-":
+            # green
+            column.attrs = {'td' : {'class' : 'text-success'}}
+            return value[1:] + " lower than average"
+        else:
+            column.attrs = {'td' : {'class' : 'text-danger'}}
+            return value + " higher than average"
+
+    class Meta:
+        model = StepInstance
+        fields = ('step', 'start_time', 'end_time', 'elapsed_time', 'dist_from_average')
+        attrs = {'class': 'table table-striped table-hover'}
+
+"""
 class TimerEntryTable(tables.Table):
     # per the django table docs, you can do render_foo method for a 'foo' column
     # https://django-tables2.readthedocs.io/en/latest/pages/custom-data.html#table-render-foo-methods
@@ -58,3 +99,4 @@ class TimerEntryTable(tables.Table):
         fields = ('title', 'operation', 'surgeon', 'start_time', 'end_time', 'elapsed_time', 'dist_from_average')
         attrs = {'class': 'table table-striped table-hover'}
 
+"""

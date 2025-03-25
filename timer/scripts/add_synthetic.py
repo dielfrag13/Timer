@@ -1,54 +1,140 @@
 import datetime
-import timer.models
+from timer.models import *
+import random
+import time
+
+random.seed(time.time())
+
+surgery_type_1 = "Sixth Finger Augmentation"
+surgery_type_2 = "Total Knee"
+surgery_type_3 = "Synthetic Femur Upgrade"
+
+
+def new_knee(surgeon):
+    print("creating new " + surgery_type_2)
+    knee_step_list = ["block done", "tubed", "prepped/draped", "time-out", "incision", "parts in", "closure end", "out of room"]
+    for s in knee_step_list:
+        Step.objects.get_or_create(title=s)
+
+    oi1 = OperationInstance(
+        operation_type=OperationType.objects.get(operation_type=surgery_type_2),
+        date=datetime.date(2025, 3, 13),
+        detail="Today we gave Paul a fresh robo knee",
+        surgeon=surgeon,
+        ocs1 = True,
+        complete = True,
+    )
+    oi1.save()
+    # add timed steps where each step takes a random amount of time between 20 and 60 minutes 
+    start_time = datetime.datetime(2025, 3, 13, 7, 30, 20)
+    end_time = start_time + datetime.timedelta(minutes=random.randint(20, 60), seconds=random.randint(0, 59))
+
+    for i, s in enumerate(knee_step_list):
+        si = StepInstance(
+            step=Step.objects.get(title=s),
+            operation_instance=oi1,
+            order=i+1,
+            start_time = start_time.time(),
+            end_time = end_time.time(),
+        )
+        si.save()
+        start_time = end_time
+        end_time += datetime.timedelta(minutes=random.randint(20,80), seconds=random.randint(0, 59))
+
+    oi1.save()        
+
+def new_femur(surgeon):
+    print("creating new " + surgery_type_3)
+    femur_step_list = ["patient hydrochloroformed", "beer shotgunned", "leg removed", "time-out", "new femur installed on leg", "leg re-appended", "closure end", "out of room"]
+    for s in femur_step_list:
+        Step.objects.get_or_create(title=s)
+
+    oi1 = OperationInstance(
+        operation_type=OperationType.objects.get(operation_type=surgery_type_3),
+        date=datetime.date(2025, 3, 13),
+        detail="Today we tested the experimental femur operation on Daniel Bubbaganoush",
+        surgeon=surgeon,
+        ocs1 = True,
+        complete = True,
+    )
+    oi1.save()
+
+    # add timed steps where each step takes a random amount of time between 20 and 60 minutes 
+    start_time = datetime.datetime(2025, 3, 13, 7, 30, 20)
+    end_time = start_time + datetime.timedelta(minutes=random.randint(20, 60), seconds=random.randint(0, 59))
+
+    for i, s in enumerate(femur_step_list):
+        si = StepInstance(
+            step=Step.objects.get(title=s),
+            operation_instance=oi1,
+            order=i+1,
+            start_time = start_time.time(),
+            end_time = end_time.time(),
+        )
+        si.save()
+        start_time = end_time
+        end_time += datetime.timedelta(minutes=random.randint(20,80), seconds=random.randint(0, 59))
+
+    oi1.save()        
+
+
+
+def new_finger(surgeon):
+    print("creating new " + surgery_type_1)
+    finger_step_list = ["patient sedated", "finger identified", "beer shotgunned", "finger augmented", "qc approved", "closure end", "out of room"]
+    for s in finger_step_list:
+        Step.objects.get_or_create(title=s)
+
+    oi1 = OperationInstance(
+        operation_type=OperationType.objects.get(operation_type=surgery_type_1),
+        date=datetime.date(2025, 3, 13),
+        detail="You wouldn't believe how in-demand sixth fingers are these days",
+        surgeon=surgeon,
+        ocs1 = True,
+        complete = True,
+    )
+    oi1.save()
+
+    # add timed steps where each step takes a random amount of time between 20 and 60 minutes 
+    start_time = datetime.datetime(2025, 3, 13, 7, 30, 20)
+    end_time = start_time + datetime.timedelta(minutes=random.randint(20, 60), seconds=random.randint(0, 59))
+
+    for i, s in enumerate(finger_step_list):
+        si = StepInstance(
+            step=Step.objects.get(title=s),
+            operation_instance=oi1,
+            order=i+1,
+            start_time = start_time.time(),
+            end_time = end_time.time(),
+        )
+        si.save()
+        start_time = end_time
+        end_time += datetime.timedelta(minutes=random.randint(20,80), seconds=random.randint(0, 59))
+
+    oi1.save()        
+
 
 
 def run():
     print("adding synthetic data!")
-    s1, _ = timer.models.SurgeonEntry.objects.get_or_create(first_name="Tom", last_name="Foolery", email="tom.foolery@lol.gov")
-    s2, _ = timer.models.SurgeonEntry.objects.get_or_create(first_name="Darrin", last_name="Trask", email="dirtydog69@aol.com")
-    s3, _ = timer.models.SurgeonEntry.objects.get_or_create(first_name="Katty", last_name="Wampus", email="inconsistent@gmail.xyz")
 
-    o1, _ = timer.models.OperationEntry.objects.get_or_create(operation_type="Sixth Finger Augmentation")
-    o2, _ = timer.models.OperationEntry.objects.get_or_create(operation_type="Synthetic Femur Upgrade")
+    surgeons = []
+    operation_types = []
+    surgeons.append(Surgeon.objects.get_or_create(first_name="Tom", last_name="Foolery", email="tom.foolery@lol.gov")[0])
+    surgeons.append(Surgeon.objects.get_or_create(first_name="Darrin", last_name="Trask", email="dirtydog69@aol.com")[0])
+    surgeons.append(Surgeon.objects.get_or_create(first_name="Katty", last_name="Wampus", email="inconsistent@gmail.xyz")[0])
 
-    
-    timer.models.TimerEntry.objects.all().delete()
-    timer.models.TimerEntry.objects.get_or_create(
-        title="Paul's First Sixth Finger", 
-        operation=o1,
-        date=datetime.date(2024, 12, 12),
-        start_time=datetime.time(7, 30, 20),
-        end_time=datetime.time(9, 12, 26),
-        detail="Today we gave Paul a sixth finger on his right hand.",
-        surgeon=s1,
-    )
+    operation_types.append(OperationType.objects.get_or_create(operation_type=surgery_type_1)[0])
+    operation_types.append(OperationType.objects.get_or_create(operation_type=surgery_type_3)[0])
+    operation_types.append(OperationType.objects.get_or_create(operation_type=surgery_type_2)[0])
 
-    timer.models.TimerEntry.objects.get_or_create(
-        title="Paul's Second Sixth Finger", 
-        operation=o1,
-        date=datetime.date(2025, 1, 17),
-        start_time=datetime.time(12, 16, 35),
-        end_time=datetime.time(17, 12, 26),
-        detail="Today we gave Paul a sixth finger on his left hand.",
-        surgeon=s2,
-    )
+    # OperationInstance.objects.all().delete()
 
-    timer.models.TimerEntry.objects.get_or_create(
-        title="Paul's new SmartFemur", 
-        operation=o2,
-        date=datetime.date(2025, 1, 5),
-        start_time=datetime.time(10, 00, 35),
-        end_time=datetime.time(13, 12, 26),
-        detail="Today we successfully replaced Paul's natural femur with our propritary new SmartFemur",
-        surgeon=s1,
-    )
-
-    timer.models.TimerEntry.objects.get_or_create(
-        title="Lisa's new SmartFemur", 
-        operation=o2,
-        date=datetime.date(2025, 1, 9),
-        start_time=datetime.time(11, 16, 35),
-        end_time=datetime.time(14, 12, 26),
-        detail="Paul loved his SmartFemur so much that Lisa asked for one too!",
-        surgeon=s2,
-    )
+    for i in range(5):
+        op = random.randint(0, 2)
+        if op == 0:
+            new_finger(surgeons[random.randint(0, 2)])
+        elif op==1:
+            new_knee(surgeons[random.randint(0, 2)])
+        else:
+            new_femur(surgeons[random.randint(0, 2)])
